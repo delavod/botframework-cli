@@ -524,7 +524,7 @@ export class OrchestratorPredict {
       Utility.debuggingLog(`this.currentEvaluationOutput=${Utility.jsonStringify(this.currentEvaluationOutput)}`);
     }
     Utility.debuggingLog('OrchestratorPredict.commandLetV(), finished calling Utility.generateEvaluationReport()');
-    console.log(`> Leave-one-out cross validation is done and report generated in '${this.predictingSetSummaryOutputFilename}'`);
+    console.log(`> Leave-one-out cross validation is done and reports generated in '${this.predictingSetSummaryOutputFilename}'`);
     return 0;
   }
 

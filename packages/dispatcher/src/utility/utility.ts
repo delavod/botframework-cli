@@ -1992,19 +1992,52 @@ export class Utility {
         ignoreEmptyFilename: boolean = true): string {
         // Utility.debuggingLog(
         //     `Utility.deleteFile(): filename=${filename}`);
+        return Utility.unlink(filename, ignoreEmptyFilename);
+    }
+    public static moveFile(
+        filename: string, targetDir: string): string {
+        // Utility.debuggingLog(
+        //     `Utility.moveFile(): filename=${filename}`);
+        // Utility.debuggingLog(
+        //     `Utility.moveFile(): targetDir=${targetDir}`);
+        const filebasename: string = path.basename(filename);
+        const destination: string = path.resolve(targetDir, filebasename);
+        return Utility.rename(filename, destination);
+    }
+
+    public static unlink(
+        entryname: string,
+        ignoreEmptyEntryName: boolean = true): string {
+        // Utility.debuggingLog(
+        //     `Utility.unlink(): entryname=${entryname}`);
         try {
-            if (Utility.isEmptyString(filename)) {
-                if (ignoreEmptyFilename) {
+            if (Utility.isEmptyString(entryname)) {
+                if (ignoreEmptyEntryName) {
                     return "";
                 }
             }
-            fs.unlinkSync(filename);
-        } catch (err) {
+            fs.unlinkSync(entryname);
+        } catch (error) {
             // ---- NOTE ---- An error occurred
-            Utility.debuggingThrow(`FAILED to delete a file: filename=${filename}`);
+            Utility.debuggingThrow(`FAILED to unlink a entry: entryname=${entryname}, error=${error}`);
             return "";
         }
-        return filename;
+        return entryname;
+    }
+    public static rename(
+        entryname: string, entrynameNew: string): string {
+        // Utility.debuggingLog(
+        //     `Utility.rename(): entryname=${entryname}`);
+        // Utility.debuggingLog(
+        //     `Utility.rename(): entrynameNew=${entrynameNew}`);
+        try {
+            fs.renameSync(entryname, entrynameNew);
+        } catch (error) {
+          // ---- NOTE ---- An error occurred
+            Utility.debuggingThrow(`FAILED to rename a entry system entry: entryname=${entrynameNew}, entryname=${entrynameNew}, error=${error}`);
+            return "";
+        }
+        return entryname;
     }
 
     public static getObjectMd5Hash(objectValue: object): string|Int32Array {

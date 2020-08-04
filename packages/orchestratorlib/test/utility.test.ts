@@ -162,8 +162,7 @@ describe('Test Suite - utility', () => {
   it('Test.0000 Utility.exists()', function () {
     Utility.toPrintDebuggingLogToConsole = UnitTestHelper.getDefaultUnitTestDebuggingLogFlag();
     this.timeout(UnitTestHelper.getDefaultUnitTestTimeout());
-    Utility.debuggingLog(
-      `process.cwd()=${process.cwd()}`);
+    Utility.debuggingLog(`process.cwd()=${process.cwd()}`);
     const doesExist: boolean = Utility.exists('resources/data/Columnar/Email.txt');
     Utility.debuggingLog(`doesExist=${doesExist}`);
     assert.ok(doesExist);

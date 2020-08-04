@@ -38,6 +38,39 @@ export class ScoreStructure {
     this.labelsScoreStructureHtmlTable = labelsScoreStructureHtmlTable;
   }
 
+  public toObject(): {
+    'utterance': string;
+    'labelsPredictedEvaluation': number; // ---- 0: TP, 1, FN, 2: FP, 3: TN
+    'labels': string[];
+    'labelsConcatenated': string;
+    'labelsIndexes': number[];
+    'labelsPredicted': string[];
+    'labelsPredictedConcatenated': string;
+    'labelsPredictedScore': number;
+    'labelsPredictedIndexes': number[];
+    'labelsPredictedClosestText': string[];
+    'scoreResultArray': Result[];
+    'scoreArray': number[];
+    'predictedScoreStructureHtmlTable': string;
+    'labelsScoreStructureHtmlTable': string; } {
+    return {
+      utterance: this.utterance,
+      labelsPredictedEvaluation: this.labelsPredictedEvaluation, // ---- 0: TP, 1, FN, 2: FP, 3: TN
+      labels: this.labels,
+      labelsConcatenated: this.labelsConcatenated,
+      labelsIndexes: this.labelsIndexes,
+      labelsPredicted: this.labelsPredicted,
+      labelsPredictedConcatenated: this.labelsPredictedConcatenated,
+      labelsPredictedScore: this.labelsPredictedScore,
+      labelsPredictedIndexes: this.labelsPredictedIndexes,
+      labelsPredictedClosestText: this.labelsPredictedClosestText,
+      scoreResultArray: this.scoreResultArray,
+      scoreArray: this.scoreArray,
+      predictedScoreStructureHtmlTable: this.predictedScoreStructureHtmlTable,
+      labelsScoreStructureHtmlTable: this.labelsScoreStructureHtmlTable,
+    };
+  }
+
   public utterance: string;
 
   public labelsPredictedEvaluation: number; // ---- 0: TP, 1, FN, 2: FP, 3: TN

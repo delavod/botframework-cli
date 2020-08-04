@@ -1919,19 +1919,7 @@ export class Utility {
     ignoreEmptyFilename: boolean = true): string {
     // Utility.debuggingLog(
     //     `Utility.deleteFile(): filename=${filename}`);
-    try {
-      if (Utility.isEmptyString(filename)) {
-        if (ignoreEmptyFilename) {
-          return '';
-        }
-      }
-      fs.unlinkSync(filename);
-    } catch (error) {
-      // ---- NOTE ---- An error occurred
-      Utility.debuggingThrow(`FAILED to delete a file: filename=${filename}, error=${error}`);
-      return '';
-    }
-    return filename;
+    return Utility.unlink(filename, ignoreEmptyFilename);
   }
 
   public static moveFile(
@@ -1939,17 +1927,46 @@ export class Utility {
     // Utility.debuggingLog(
     //     `Utility.moveFile(): filename=${filename}`);
     // Utility.debuggingLog(
-    //     `Utility.targetDir(): filename=${targetDir}`);
+    //     `Utility.moveFile(): targetDir=${targetDir}`);
+    const filebasename: string = path.basename(filename);
+    const destination: string = path.resolve(targetDir, filebasename);
+    return Utility.rename(filename, destination);
+  }
+
+  public static unlink(
+    entryname: string,
+    ignoreEmptyEntryName: boolean = true): string {
+    // Utility.debuggingLog(
+    //     `Utility.unlink(): entryname=${entryname}`);
     try {
-      const filebasename: string = path.basename(filename);
-      const destination: string = path.resolve(targetDir, filebasename);
-      fs.renameSync(filename, destination);
+      if (Utility.isEmptyString(entryname)) {
+        if (ignoreEmptyEntryName) {
+          return '';
+        }
+      }
+      fs.unlinkSync(entryname);
     } catch (error) {
       // ---- NOTE ---- An error occurred
-      Utility.debuggingThrow(`FAILED to move a file: filename=${filename}, error=${error}`);
+      Utility.debuggingThrow(`FAILED to unlink a entry: entryname=${entryname}, error=${error}`);
       return '';
     }
-    return filename;
+    return entryname;
+  }
+
+  public static rename(
+    entryname: string, entrynameNew: string): string {
+    // Utility.debuggingLog(
+    //     `Utility.rename(): entryname=${entryname}`);
+    // Utility.debuggingLog(
+    //     `Utility.rename(): entrynameNew=${entrynameNew}`);
+    try {
+      fs.renameSync(entryname, entrynameNew);
+    } catch (error) {
+      // ---- NOTE ---- An error occurred
+      Utility.debuggingThrow(`FAILED to rename a entry system entry: entryname=${entrynameNew}, entryname=${entrynameNew}, error=${error}`);
+      return '';
+    }
+    return entryname;
   }
 
   public static writeToConsole(outputContents: string) {
