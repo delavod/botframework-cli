@@ -1,6 +1,11 @@
+/*!
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ */
+
 import {expect, test} from '@oclif/test';
-const path = require('path')
-const fs = require('fs-extra')
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 const EMULATOR_CONNECTION_STRING: string = 'DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;' +
     'AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;' +
@@ -9,18 +14,18 @@ const EMULATOR_CONNECTION_STRING: string = 'DefaultEndpointsProtocol=http;Accoun
     'QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;';
 
 function findFile(dir: string, fileToFind: string): string {
-
   const files: string[] = fs.readdirSync(dir);
 
   for (let i: number = 0; i < files.length; i++) {
     const fullPath: string = path.join(dir, files[i]);
 
     if (fs.lstatSync(fullPath).isDirectory()) {
-      const result = findFile(fullPath, fileToFind);
+      const result: string = findFile(fullPath, fileToFind);
       if (result !== '') {
         return result;
       }
     } else if (files[i] === fileToFind) {
+      // eslint-disable-next-line no-console
       console.log(`START DIR: ${fullPath}`);
       return fullPath;
     }
@@ -29,6 +34,8 @@ function findFile(dir: string, fileToFind: string): string {
 }
 
 describe('orchestrator:finetune cli parameters test', () => {
+  // eslint-disable-next-line no-console
+  console.log(`EMULATOR_CONNECTION_STRING=${EMULATOR_CONNECTION_STRING}`);
   test
   .stdout()
   .stderr()
@@ -66,7 +73,7 @@ describe('orchestrator:finetune cli parameters test', () => {
     test
     .stdout()
     .command(['orchestrator:finetune', 'put', '--debug', '--in', testFile, '--logformat', 'dtedata'])
-    .it('FT.0004 uploads dtedata with lowercase logformat', (ctx: any) => {
+    .it('FT.0004 uploads dtedata with lowercase logformat', (_ctx: any) => {
       // expect(ctx.stdout).to.contain('Upload result:');
     });
   }
