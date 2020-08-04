@@ -50,7 +50,6 @@ export class OrchestratorTest {
     Utility.debuggingLog(`lowConfidenceScoreThreshold=${lowConfidenceScoreThreshold}`);
     Utility.debuggingLog(`multiLabelPredictionThreshold=${multiLabelPredictionThreshold}`);
     Utility.debuggingLog(`unknownLabelPredictionThreshold=${unknownLabelPredictionThreshold}`);
-
     // ---- NOTE ---- load the training set
     const trainingFile: string = inputPath;
     if (!Utility.exists(trainingFile)) {
@@ -59,12 +58,10 @@ export class OrchestratorTest {
     const testingSetScoreOutputFile: string = path.join(outputPath, 'orchestrator_testing_set_scores.txt');
     const testingSetSummaryOutputFile: string = path.join(outputPath, 'orchestrator_testing_set_summary.html');
     const labelsOutputFilename: string = path.join(outputPath, 'orchestrator_labels.txt');
-
     // ---- NOTE ---- create a LabelResolver object.
     Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call LabelResolver.createWithSnapshotAsync()');
     const labelResolver: any = await LabelResolver.createWithSnapshotAsync(nlrPath, trainingFile);
     Utility.debuggingLog('OrchestratorTest.runAsync(), after calling LabelResolver.createWithSnapshotAsync()');
-
     // ---- NOTE ---- process the training set, retrieve labels
     let processedUtteranceLabelsMap: {
       'utteranceLabelsMap': { [id: string]: string[] };
@@ -77,7 +74,6 @@ export class OrchestratorTest {
         (accumulant: string[], entry: string[]) => accumulant.concat(entry), []);
     const trainingSetLabelSet: Set<string> =
       new Set<string>(trainingSetLabels);
-
     // ---- NOTE ---- process the testing set.
     processedUtteranceLabelsMap = await OrchestratorHelper.getUtteranceLabelsMap(testPath, false);
     Utility.processUnknowLabelsInUtteranceLabelsMapUsingLabelSet(processedUtteranceLabelsMap, trainingSetLabelSet);
@@ -91,12 +87,14 @@ export class OrchestratorTest {
     if (Object.entries(utteranceLabelsMap).length <= 0) {
       Utility.debuggingThrow('there is no example, something wrong?');
     }
-
     // ---- NOTE ---- integrated step to produce analysis reports.
+    Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call Utility.resetLabelResolverSettingIgnoreSameExample("false")');
     Utility.resetLabelResolverSettingIgnoreSameExample(labelResolver, false);
+    Utility.debuggingLog('OrchestratorTest.runAsync(), finished calling Utility.resetLabelResolverSettingIgnoreSameExample()');
+    Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call Utility.generateEvaluationReport()');
     const evaluationOutput: {
       'evaluationReportLabelUtteranceStatistics': {
-        'evaluationSummaryTemplate': string;
+        'evaluationSummary': string;
         'labelArrayAndMap': {
           'stringArray': string[];
           'stringMap': {[id: string]: number};};
@@ -114,7 +112,7 @@ export class OrchestratorTest {
         'utterancesMultiLabelArraysHtml': string;
         'utteranceLabelDuplicateHtml': string; };
       'evaluationReportAnalyses': {
-        'evaluationSummaryTemplate': string;
+        'evaluationSummary': string;
         'ambiguousAnalysis': {
           'scoringAmbiguousUtterancesArrays': string[][];
           'scoringAmbiguousUtterancesArraysHtml': string;
@@ -134,15 +132,13 @@ export class OrchestratorTest {
           'confusionMatrixMetricsHtml': string;
           'confusionMatrixAverageMetricsHtml': string;}; };
       'scoreStructureArray': ScoreStructure[];
+      'scoreOutputLines': string[][];
     } =
     Utility.generateEvaluationReport(
       labelResolver,
       trainingSetLabels,
       utteranceLabelsMap,
       utteranceLabelDuplicateMap,
-      labelsOutputFilename,
-      testingSetScoreOutputFile,
-      testingSetSummaryOutputFile,
       ambiguousCloseness,
       lowConfidenceScoreThreshold,
       multiLabelPredictionThreshold,
@@ -150,7 +146,20 @@ export class OrchestratorTest {
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
       Utility.debuggingLog(`evaluationOutput=${Utility.jsonStringify(evaluationOutput)}`);
     }
-
+    Utility.debuggingLog('OrchestratorTest.runAsync(), finished calling Utility.generateEvaluationReport()');
+    // ---- NOTE ---- integrated step to produce analysis report output files.
+    Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call Utility.generateEvaluationReportFiles()');
+    Utility.generateEvaluationReportFiles(
+      evaluationOutput.evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringArray,
+      evaluationOutput.scoreOutputLines,
+      evaluationOutput.evaluationReportAnalyses.evaluationSummary,
+      labelsOutputFilename,
+      testingSetScoreOutputFile,
+      testingSetSummaryOutputFile);
+    Utility.debuggingLog('OrchestratorTest.runAsync(), finished calling Utility.generateEvaluationReportFiles()');
+    if (Utility.toPrintDetailedDebuggingLogToConsole) {
+      Utility.debuggingLog(`evaluationOutput=${Utility.jsonStringify(evaluationOutput)}`);
+    }
     // ---- NOTE ---- THE END
     Utility.debuggingLog('OrchestratorTest.runAsync(), THE END');
   }

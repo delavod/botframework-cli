@@ -22,7 +22,7 @@ export default class OrchestratorTest extends Command {
     model: flags.string({char: 'm', description: 'Directory or a config file hosting Orchestrator model files.'}),
     ambiguous: flags.string({char: 'a', description: `Ambiguous threshold, default to ${Utility.DefaultAmbiguousClosenessParameter}`}),
     low_confidence: flags.string({char: 'l', description: `Low confidence threshold, default to ${Utility.DefaultLowConfidenceScoreThresholdParameter}`}),
-    multi_label: flags.string({char: 'u', description: `Multi-label threshold, default to ${Utility.DefaultMultiLabelPredictionThresholdParameter}`}),
+    multi_label: flags.string({char: 'p', description: `Plural/multi-label prediction threshold, default to ${Utility.DefaultMultiLabelPredictionThresholdParameter}`}),
     unknown: flags.string({char: 'u', description: `Unknow label threshold, default to ${Utility.DefaultUnknownLabelPredictionThresholdParameter}`}),
     debug: flags.boolean({char: 'd'}),
     help: flags.help({char: 'h'}),

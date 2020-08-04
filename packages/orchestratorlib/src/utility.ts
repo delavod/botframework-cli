@@ -162,7 +162,7 @@ export class Utility {
 
   public static generateEmptyEvaluationReport(): {
     'evaluationReportLabelUtteranceStatistics': {
-      'evaluationSummaryTemplate': string;
+      'evaluationSummary': string;
       'labelArrayAndMap': {
         'stringArray': string[];
         'stringMap': {[id: string]: number};};
@@ -180,7 +180,7 @@ export class Utility {
       'utterancesMultiLabelArraysHtml': string;
       'utteranceLabelDuplicateHtml': string; };
     'evaluationReportAnalyses': {
-      'evaluationSummaryTemplate': string;
+      'evaluationSummary': string;
       'ambiguousAnalysis': {
         'scoringAmbiguousUtterancesArrays': string[][];
         'scoringAmbiguousUtterancesArraysHtml': string;
@@ -200,10 +200,11 @@ export class Utility {
         'confusionMatrixMetricsHtml': string;
         'confusionMatrixAverageMetricsHtml': string;}; };
     'scoreStructureArray': ScoreStructure[];
+    'scoreOutputLines': string[][];
     } {
     const evaluationOutput: {
       'evaluationReportLabelUtteranceStatistics': {
-        'evaluationSummaryTemplate': string;
+        'evaluationSummary': string;
         'labelArrayAndMap': {
           'stringArray': string[];
           'stringMap': {[id: string]: number};};
@@ -221,7 +222,7 @@ export class Utility {
         'utterancesMultiLabelArraysHtml': string;
         'utteranceLabelDuplicateHtml': string; };
       'evaluationReportAnalyses': {
-        'evaluationSummaryTemplate': string;
+        'evaluationSummary': string;
         'ambiguousAnalysis': {
           'scoringAmbiguousUtterancesArrays': string[][];
           'scoringAmbiguousUtterancesArraysHtml': string;
@@ -241,9 +242,10 @@ export class Utility {
           'confusionMatrixMetricsHtml': string;
           'confusionMatrixAverageMetricsHtml': string;}; };
       'scoreStructureArray': ScoreStructure[];
+      'scoreOutputLines': string[][];
     } = {
       evaluationReportLabelUtteranceStatistics: {
-        evaluationSummaryTemplate: '',
+        evaluationSummary: '',
         labelArrayAndMap: {
           stringArray: [],
           stringMap: {}},
@@ -261,7 +263,7 @@ export class Utility {
         utterancesMultiLabelArraysHtml: '',
         utteranceLabelDuplicateHtml: ''},
       evaluationReportAnalyses: {
-        evaluationSummaryTemplate: '',
+        evaluationSummary: '',
         ambiguousAnalysis: {
           scoringAmbiguousUtterancesArrays: [],
           scoringAmbiguousUtterancesArraysHtml: '',
@@ -281,8 +283,37 @@ export class Utility {
           confusionMatrixMetricsHtml: '',
           confusionMatrixAverageMetricsHtml: ''}},
       scoreStructureArray: [],
+      scoreOutputLines: [],
     };
     return evaluationOutput;
+  }
+
+  // eslint-disable-next-line max-params
+  public static generateEvaluationReportFiles(
+    stringArray: string[],
+    scoreOutputLines: string[][],
+    evaluationSummary: string,
+    labelsOutputFilename: string,
+    evaluationSetScoreOutputFilename: string,
+    evaluationSetSummaryOutputFilename: string): void {
+    // ---- NOTE ---- output the labels by their index order to a file.
+    Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.storeDataArraysToTsvFile()');
+    Utility.storeDataArraysToTsvFile(
+      labelsOutputFilename,
+      stringArray.map((x: string) => [x]));
+    Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.storeDataArraysToTsvFile()');
+    // ---- NOTE ---- produce a score TSV file.
+    Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.storeDataArraysToTsvFile()');
+    Utility.storeDataArraysToTsvFile(
+      evaluationSetScoreOutputFilename,
+      scoreOutputLines);
+    Utility.debuggingLog('Utility.generateEvaluationReport(), finishing calling Utility.storeDataArraysToTsvFile');
+    // ---- NOTE ---- produce the evaluation summary file.
+    Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.dumpFile()');
+    Utility.dumpFile(
+      evaluationSetSummaryOutputFilename,
+      evaluationSummary);
+    Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.dumpFile()');
   }
 
   // eslint-disable-next-line max-params
@@ -291,15 +322,12 @@ export class Utility {
     trainingSetLabels: string[],
     utteranceLabelsMap: { [id: string]: string[] },
     utteranceLabelDuplicateMap: Map<string, Set<string>>,
-    labelsOutputFilename: string,
-    evaluationSetScoreOutputFilename: string,
-    evaluationSetSummaryOutputFilename: string,
     ambiguousCloseness: number,
     lowConfidenceScoreThreshold: number,
     multiLabelPredictionThreshold: number,
     unknownLabelPredictionThreshold: number): {
       'evaluationReportLabelUtteranceStatistics': {
-        'evaluationSummaryTemplate': string;
+        'evaluationSummary': string;
         'labelArrayAndMap': {
           'stringArray': string[];
           'stringMap': {[id: string]: number};};
@@ -317,7 +345,7 @@ export class Utility {
         'utterancesMultiLabelArraysHtml': string;
         'utteranceLabelDuplicateHtml': string; };
       'evaluationReportAnalyses': {
-        'evaluationSummaryTemplate': string;
+        'evaluationSummary': string;
         'ambiguousAnalysis': {
           'scoringAmbiguousUtterancesArrays': string[][];
           'scoringAmbiguousUtterancesArraysHtml': string;
@@ -337,11 +365,12 @@ export class Utility {
           'confusionMatrixMetricsHtml': string;
           'confusionMatrixAverageMetricsHtml': string;}; };
       'scoreStructureArray': ScoreStructure[];
+      'scoreOutputLines': string[][];
     } {
     // ---- NOTE ---- generate evaluation report before calling the score() function.
     Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.generateEvaluationReportLabelUtteranceStatistics()');
     const evaluationReportLabelUtteranceStatistics: {
-      'evaluationSummaryTemplate': string;
+      'evaluationSummary': string;
       'labelArrayAndMap': {
         'stringArray': string[];
         'stringMap': {[id: string]: number};};
@@ -365,14 +394,6 @@ export class Utility {
       // ---- multiLabelPredictionThreshold,
       unknownLabelPredictionThreshold);
     Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.generateEvaluationReportLabelUtteranceStatistics()');
-
-    // ---- NOTE ---- output the labels by their index order to a file.
-    Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.storeDataArraysToTsvFile()');
-    Utility.storeDataArraysToTsvFile(
-      labelsOutputFilename,
-      evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringArray.map((x: string) => [x]));
-    Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.storeDataArraysToTsvFile()');
-
     // ---- NOTE ---- collect utterance prediction and scores.
     Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.score()');
     const utteranceLabelsPairArray: [string, string[]][] = Object.entries(utteranceLabelsMap);
@@ -383,11 +404,10 @@ export class Utility {
       multiLabelPredictionThreshold,
       unknownLabelPredictionThreshold);
     Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.score()');
-
     // ---- NOTE ---- generate evaluation report after calling the score() function.
     Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.generateEvaluationReportAnalyses()');
     const evaluationReportAnalyses: {
-      'evaluationSummaryTemplate': string;
+      'evaluationSummary': string;
       'ambiguousAnalysis': {
         'scoringAmbiguousUtterancesArrays': string[][];
         'scoringAmbiguousUtterancesArraysHtml': string;
@@ -407,29 +427,17 @@ export class Utility {
         'confusionMatrixMetricsHtml': string;
         'confusionMatrixAverageMetricsHtml': string;};
     } = Utility.generateEvaluationReportAnalyses(
-      evaluationReportLabelUtteranceStatistics.evaluationSummaryTemplate,
+      evaluationReportLabelUtteranceStatistics.evaluationSummary,
       evaluationReportLabelUtteranceStatistics.labelArrayAndMap,
       scoreStructureArray,
       ambiguousCloseness,
       lowConfidenceScoreThreshold);
     Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.generateEvaluationReportAnalyses()');
-
-    // ---- NOTE ---- produce a score TSV file.
-    Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.storeDataArraysToTsvFile()');
+    // ---- NOTE ---- generate score output file lines.
+    Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.generateScoreOutputLines()');
     const scoreOutputLines: string[][] = Utility.generateScoreOutputLines(
       scoreStructureArray);
-    Utility.storeDataArraysToTsvFile(
-      evaluationSetScoreOutputFilename,
-      scoreOutputLines);
-    Utility.debuggingLog('Utility.generateEvaluationReport(), finishing calling Utility.storeDataArraysToTsvFile');
-
-    // ---- NOTE ---- produce the evaluation summary file.
-    Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.dumpFile()');
-    Utility.dumpFile(
-      evaluationSetSummaryOutputFilename,
-      evaluationReportAnalyses.evaluationSummaryTemplate);
-    Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.dumpFile()');
-
+    Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.generateScoreOutputLines()');
     // ---- NOTE ---- debugging ouput.
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
       Utility.debuggingLog(`Utility.generateEvaluationReport(), JSON.stringify(labelArrayAndMap.stringArray)=${JSON.stringify(evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringArray)}`);
@@ -437,12 +445,12 @@ export class Utility {
       const labels: any = labelResolver.getLabels();
       Utility.debuggingLog(`Utility.generateEvaluationReport(), JSON.stringify(labels)=${JSON.stringify(labels)}`);
     }
-
     // ---- NOTE ---- return
     return {
       evaluationReportLabelUtteranceStatistics,
       evaluationReportAnalyses,
-      scoreStructureArray};
+      scoreStructureArray,
+      scoreOutputLines};
   }
 
   // eslint-disable-next-line max-params
@@ -452,7 +460,7 @@ export class Utility {
     utteranceLabelDuplicateMap: Map<string, Set<string>>,
     // ---- multiLabelPredictionThreshold: number,
     unknownLabelPredictionThreshold: number): {
-      'evaluationSummaryTemplate': string;
+      'evaluationSummary': string;
       'labelArrayAndMap': {
         'stringArray': string[];
         'stringMap': {[id: string]: number};};
@@ -489,10 +497,8 @@ export class Utility {
     }
     Utility.debuggingLog(`Utility.generateEvaluationReportLabelUtteranceStatistics(), JSON.stringify(labelArrayAndMap.stringArray)=${JSON.stringify(labelArrayAndMap.stringArray)}`);
     Utility.debuggingLog(`Utility.generateEvaluationReportLabelUtteranceStatistics(), JSON.stringify(labelArrayAndMap.stringMap)=${JSON.stringify(labelArrayAndMap.stringMap)}`);
-
     // ---- NOTE ---- load the evaluation summary template.
-    let evaluationSummaryTemplate: string = EvaluationSummaryTemplateHtml.html;
-
+    let evaluationSummary: string = EvaluationSummaryTemplateHtml.html;
     // ---- NOTE ---- generate label statistics.
     const labelStatisticsAndHtmlTable: {
       'labelUtterancesMap': { [id: string]: string[] };
@@ -514,9 +520,8 @@ export class Utility {
     // ---- NOTE ---- create the evaluation INTENTUTTERANCESTATISTICS summary from template.
     const intentsUtterancesStatisticsHtml: string =
       labelStatisticsAndHtmlTable.labelStatisticsHtml + utteranceStatisticsAndHtmlTable.utteranceStatisticsHtml;
-    evaluationSummaryTemplate = evaluationSummaryTemplate.replace('{INTENTUTTERANCESTATISTICS}', intentsUtterancesStatisticsHtml);
+    evaluationSummary = evaluationSummary.replace('{INTENTUTTERANCESTATISTICS}', intentsUtterancesStatisticsHtml);
     Utility.debuggingLog('Utility.generateEvaluationReportLabelUtteranceStatistics(), finished generating {INTENTUTTERANCESTATISTICS} content');
-
     // ---- NOTE ---- generate duplicate report.
     const utterancesMultiLabelArrays: [string, string][] = Object.entries(utteranceLabelsMap).filter(
       (x: [string, string[]]) => x[1].length > 1).map((x: [string, string[]]) => [x[0], x[1].join(',')]);
@@ -532,12 +537,11 @@ export class Utility {
     // ---- NOTE ---- create the evaluation DUPLICATES summary from template.
     const duplicateStatisticsHtml: string =
       utterancesMultiLabelArraysHtml + utteranceLabelDuplicateHtml;
-    evaluationSummaryTemplate = evaluationSummaryTemplate.replace('{DUPLICATES}', duplicateStatisticsHtml);
+    evaluationSummary = evaluationSummary.replace('{DUPLICATES}', duplicateStatisticsHtml);
     Utility.debuggingLog('Utility.generateEvaluationReportLabelUtteranceStatistics(), finished generating {DUPLICATES} content');
-
     // ---- NOTE ---- return
     return {
-      evaluationSummaryTemplate,
+      evaluationSummary,
       labelArrayAndMap,
       labelStatisticsAndHtmlTable,
       utteranceStatisticsAndHtmlTable,
@@ -548,14 +552,14 @@ export class Utility {
 
   // eslint-disable-next-line max-params
   public static generateEvaluationReportAnalyses(
-    evaluationSummaryTemplate: string,
+    evaluationSummary: string,
     labelArrayAndMap: {
       'stringArray': string[];
       'stringMap': {[id: string]: number};},
     scoreStructureArray: ScoreStructure[],
     ambiguousCloseness: number,
     lowConfidenceScoreThreshold: number): {
-      'evaluationSummaryTemplate': string;
+      'evaluationSummary': string;
       'ambiguousAnalysis': {
         'scoringAmbiguousUtterancesArrays': string[][];
         'scoringAmbiguousUtterancesArraysHtml': string;
@@ -583,9 +587,8 @@ export class Utility {
     } = Utility.generateAmbiguousStatisticsAndHtmlTable(
       scoreStructureArray,
       ambiguousCloseness);
-    evaluationSummaryTemplate = evaluationSummaryTemplate.replace('{AMBIGUOUS}', ambiguousAnalysis.scoringAmbiguousUtterancesArraysHtml);
+    evaluationSummary = evaluationSummary.replace('{AMBIGUOUS}', ambiguousAnalysis.scoringAmbiguousUtterancesArraysHtml);
     Utility.debuggingLog('Utility.generateEvaluationReportAnalyses(), finished generating {AMBIGUOUS} content');
-
     // ---- NOTE ---- generate misclassified HTML.
     const misclassifiedAnalysis: {
       'scoringMisclassifiedUtterancesArrays': string[][];
@@ -593,9 +596,8 @@ export class Utility {
       'scoringMisclassifiedUtterancesSimpleArrays': string[][];
     } = Utility.generateMisclassifiedStatisticsAndHtmlTable(
       scoreStructureArray);
-    evaluationSummaryTemplate = evaluationSummaryTemplate.replace('{MISCLASSIFICATION}', misclassifiedAnalysis.scoringMisclassifiedUtterancesArraysHtml);
+    evaluationSummary = evaluationSummary.replace('{MISCLASSIFICATION}', misclassifiedAnalysis.scoringMisclassifiedUtterancesArraysHtml);
     Utility.debuggingLog('Utility.generateEvaluationReportAnalyses(), finished generating {MISCLASSIFICATION} content');
-
     // ---- NOTE ---- generate low-confidence HTML.
     const lowConfidenceAnalysis: {
       'scoringLowConfidenceUtterancesArrays': string[][];
@@ -604,9 +606,8 @@ export class Utility {
     } = Utility.generateLowConfidenceStatisticsAndHtmlTable(
       scoreStructureArray,
       lowConfidenceScoreThreshold);
-    evaluationSummaryTemplate = evaluationSummaryTemplate.replace('{LOWCONFIDENCE}', lowConfidenceAnalysis.scoringLowConfidenceUtterancesArraysHtml);
+    evaluationSummary = evaluationSummary.replace('{LOWCONFIDENCE}', lowConfidenceAnalysis.scoringLowConfidenceUtterancesArraysHtml);
     Utility.debuggingLog('Utility.generateEvaluationReportAnalyses(), finished generating {LOWCONFIDENCE} content');
-
     // ---- NOTE ---- produce confusion matrix result.
     const confusionMatrixAnalysis: {
       'confusionMatrix': MultiLabelConfusionMatrix;
@@ -617,14 +618,13 @@ export class Utility {
     } = Utility.generateConfusionMatrixMetricsAndHtmlTable(
       scoreStructureArray,
       labelArrayAndMap);
-    evaluationSummaryTemplate = evaluationSummaryTemplate.replace(
+    evaluationSummary = evaluationSummary.replace(
       '{MODELEVALUATION}',
       confusionMatrixAnalysis.confusionMatrixMetricsHtml + confusionMatrixAnalysis.confusionMatrixAverageMetricsHtml);
     Utility.debuggingLog('Utility.generateEvaluationReportAnalyses(), finished generating {MODELEVALUATION} content');
-
     // ---- NOTE ---- return
     return {
-      evaluationSummaryTemplate,
+      evaluationSummary,
       ambiguousAnalysis,
       misclassifiedAnalysis,
       lowConfidenceAnalysis,
@@ -1914,10 +1914,42 @@ export class Utility {
     return fs.existsSync(pathToFileSystemEntry);
   }
 
-  public static moveFile(filename: string, targetDir: string) {
-    const filebasename: string = path.basename(filename);
-    const destination: string = path.resolve(targetDir, filebasename);
-    fs.renameSync(filename, destination);
+  public static deleteFile(
+    filename: string,
+    ignoreEmptyFilename: boolean = true): string {
+    // Utility.debuggingLog(
+    //     `Utility.deleteFile(): filename=${filename}`);
+    try {
+      if (Utility.isEmptyString(filename)) {
+        if (ignoreEmptyFilename) {
+          return '';
+        }
+      }
+      fs.unlinkSync(filename);
+    } catch (error) {
+      // ---- NOTE ---- An error occurred
+      Utility.debuggingThrow(`FAILED to delete a file: filename=${filename}, error=${error}`);
+      return '';
+    }
+    return filename;
+  }
+
+  public static moveFile(
+    filename: string, targetDir: string): string {
+    // Utility.debuggingLog(
+    //     `Utility.moveFile(): filename=${filename}`);
+    // Utility.debuggingLog(
+    //     `Utility.targetDir(): filename=${targetDir}`);
+    try {
+      const filebasename: string = path.basename(filename);
+      const destination: string = path.resolve(targetDir, filebasename);
+      fs.renameSync(filename, destination);
+    } catch (error) {
+      // ---- NOTE ---- An error occurred
+      Utility.debuggingThrow(`FAILED to move a file: filename=${filename}, error=${error}`);
+      return '';
+    }
+    return filename;
   }
 
   public static writeToConsole(outputContents: string) {

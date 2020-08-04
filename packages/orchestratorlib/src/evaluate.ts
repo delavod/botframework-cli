@@ -54,11 +54,10 @@ export class OrchestratorEvaluate {
     const trainingSetScoreOutputFile: string = path.join(outputPath, 'orchestrator_training_set_scores.txt');
     const trainingSetSummaryOutputFile: string = path.join(outputPath, 'orchestrator_training_set_summary.html');
     const labelsOutputFilename: string = path.join(outputPath, 'orchestrator_labels.txt');
-
+    // ---- NOTE ---- create a labelResolver object with a snapshot
     Utility.debuggingLog('OrchestratorEvaluate.runAsync(), ready to call LabelResolver.createWithSnapshotAsync()');
     const labelResolver: any = await LabelResolver.createWithSnapshotAsync(nlrPath, trainingFile);
     Utility.debuggingLog('OrchestratorEvaluate.runAsync(), after calling LabelResolver.createWithSnapshotAsync()');
-
     // ---- NOTE ---- retrieve labels
     const labels: string[] = labelResolver.getLabels(LabelType.Intent);
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
@@ -66,7 +65,6 @@ export class OrchestratorEvaluate {
       // Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), JSON.stringify(labelArrayAndMap.stringMap)=${JSON.stringify(labelArrayAndMap.stringMap)}`);
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), JSON.stringify(labels)=${JSON.stringify(labels)}`);
     }
-
     // ---- NOTE ---- retrieve examples, process the training set, retrieve labels, and create a label-index map.
     const utteranceLabelsMap: { [id: string]: string[] } = {};
     const utteranceLabelDuplicateMap: Map<string, Set<string>> = new Map<string, Set<string>>();
@@ -103,12 +101,14 @@ export class OrchestratorEvaluate {
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), label.span.offset=${offset}`);
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), label.span.length=${length}`);
     }
-
     // ---- NOTE ---- integrated step to produce analysis reports.
+    Utility.debuggingLog('OrchestratorEvaluate.runAsync(), ready to call Utility.resetLabelResolverSettingIgnoreSameExample("true")');
     Utility.resetLabelResolverSettingIgnoreSameExample(labelResolver, true);
+    Utility.debuggingLog('OrchestratorEvaluate.runAsync(), finished calling Utility.resetLabelResolverSettingIgnoreSameExample()');
+    Utility.debuggingLog('OrchestratorEvaluate.runAsync(), ready to call Utility.generateEvaluationReport()');
     const evaluationOutput: {
       'evaluationReportLabelUtteranceStatistics': {
-        'evaluationSummaryTemplate': string;
+        'evaluationSummary': string;
         'labelArrayAndMap': {
           'stringArray': string[];
           'stringMap': {[id: string]: number};};
@@ -126,7 +126,7 @@ export class OrchestratorEvaluate {
         'utterancesMultiLabelArraysHtml': string;
         'utteranceLabelDuplicateHtml': string; };
       'evaluationReportAnalyses': {
-        'evaluationSummaryTemplate': string;
+        'evaluationSummary': string;
         'ambiguousAnalysis': {
           'scoringAmbiguousUtterancesArrays': string[][];
           'scoringAmbiguousUtterancesArraysHtml': string;
@@ -146,23 +146,31 @@ export class OrchestratorEvaluate {
           'confusionMatrixMetricsHtml': string;
           'confusionMatrixAverageMetricsHtml': string;}; };
         'scoreStructureArray': ScoreStructure[];
+        'scoreOutputLines': string[][];
     } =
     Utility.generateEvaluationReport(
       labelResolver,
       labels,
       utteranceLabelsMap,
       utteranceLabelDuplicateMap,
-      labelsOutputFilename,
-      trainingSetScoreOutputFile,
-      trainingSetSummaryOutputFile,
       ambiguousCloseness,
       lowConfidenceScoreThreshold,
       multiLabelPredictionThreshold,
       unknownLabelPredictionThreshold);
+    // ---- NOTE ---- integrated step to produce analysis report output files.
+    Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call Utility.generateEvaluationReportFiles()');
+    Utility.generateEvaluationReportFiles(
+      evaluationOutput.evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringArray,
+      evaluationOutput.scoreOutputLines,
+      evaluationOutput.evaluationReportAnalyses.evaluationSummary,
+      labelsOutputFilename,
+      trainingSetScoreOutputFile,
+      trainingSetSummaryOutputFile);
+    Utility.debuggingLog('OrchestratorTest.runAsync(), finished calling Utility.generateEvaluationReportFiles()');
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
       Utility.debuggingLog(`evaluationOutput=${Utility.jsonStringify(evaluationOutput)}`);
     }
-
+    Utility.debuggingLog('OrchestratorEvaluate.runAsync(), finished calling Utility.generateEvaluationReport()');
     // ---- NOTE ---- THE END
     Utility.debuggingLog('OrchestratorEvaluate.runAsync(), THE END');
   }

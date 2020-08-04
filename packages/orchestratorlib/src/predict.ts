@@ -115,7 +115,7 @@ export class OrchestratorPredict {
 
   protected currentEvaluationOutput: {
     'evaluationReportLabelUtteranceStatistics': {
-      'evaluationSummaryTemplate': string;
+      'evaluationSummary': string;
       'labelArrayAndMap': {
         'stringArray': string[];
         'stringMap': {[id: string]: number};};
@@ -133,7 +133,7 @@ export class OrchestratorPredict {
       'utterancesMultiLabelArraysHtml': string;
       'utteranceLabelDuplicateHtml': string; };
     'evaluationReportAnalyses': {
-      'evaluationSummaryTemplate': string;
+      'evaluationSummary': string;
       'ambiguousAnalysis': {
         'scoringAmbiguousUtterancesArrays': string[][];
         'scoringAmbiguousUtterancesArraysHtml': string;
@@ -153,6 +153,7 @@ export class OrchestratorPredict {
         'confusionMatrixMetricsHtml': string;
         'confusionMatrixAverageMetricsHtml': string;}; };
     'scoreStructureArray': ScoreStructure[];
+    'scoreOutputLines': string[][];
   } = Utility.generateEmptyEvaluationReport();
 
   /* eslint-disable max-params */
@@ -485,6 +486,7 @@ export class OrchestratorPredict {
   }
 
   public commandLetV(): number {
+    // ---- NOTE ---- process the training set.
     const labels: string[] = this.labelResolver.getLabels(LabelType.Intent);
     const utteranceLabelsMap: { [id: string]: string[] } = {};
     const utteranceLabelDuplicateMap: Map<string, Set<string>> = new Map<string, Set<string>>();
@@ -494,23 +496,34 @@ export class OrchestratorPredict {
       return -1;
     }
     Utility.examplesToUtteranceLabelMaps(examples, utteranceLabelsMap, utteranceLabelDuplicateMap);
-    Utility.resetLabelResolverSettingIgnoreSameExample(this.labelResolver, true);
     // ---- NOTE ---- integrated step to produce analysis reports.
+    Utility.debuggingLog('OrchestratorPredict.commandLetV(), ready to call Utility.resetLabelResolverSettingIgnoreSameExample()');
+    Utility.resetLabelResolverSettingIgnoreSameExample(this.labelResolver, true);
+    Utility.debuggingLog('OrchestratorPredict.commandLetV(), finished calling Utility.resetLabelResolverSettingIgnoreSameExample()');
+    Utility.debuggingLog('OrchestratorPredict.commandLetV(), ready to call Utility.generateEvaluationReport()');
     this.currentEvaluationOutput = Utility.generateEvaluationReport(
       this.labelResolver,
       labels,
       utteranceLabelsMap,
       utteranceLabelDuplicateMap,
-      this.labelsOutputFilename,
-      this.predictingSetScoreOutputFilename,
-      this.predictingSetSummaryOutputFilename,
       this.ambiguousCloseness,
       this.lowConfidenceScoreThreshold,
       this.multiLabelPredictionThreshold,
       this.unknownLabelPredictionThreshold);
+    // ---- NOTE ---- integrated step to produce analysis report output files.
+    Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call Utility.generateEvaluationReportFiles()');
+    Utility.generateEvaluationReportFiles(
+      this.currentEvaluationOutput.evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringArray,
+      this.currentEvaluationOutput.scoreOutputLines,
+      this.currentEvaluationOutput.evaluationReportAnalyses.evaluationSummary,
+      this.labelsOutputFilename,
+      this.predictingSetScoreOutputFilename,
+      this.predictingSetSummaryOutputFilename);
+    Utility.debuggingLog('OrchestratorTest.runAsync(), finished calling Utility.generateEvaluationReportFiles()');
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
-      Utility.debuggingLog(`currentEvaluationOutput=${Utility.jsonStringify(this.currentEvaluationOutput)}`);
+      Utility.debuggingLog(`this.currentEvaluationOutput=${Utility.jsonStringify(this.currentEvaluationOutput)}`);
     }
+    Utility.debuggingLog('OrchestratorPredict.commandLetV(), finished calling Utility.generateEvaluationReport()');
     console.log(`> Leave-one-out cross validation is done and report generated in '${this.predictingSetSummaryOutputFilename}'`);
     return 0;
   }
