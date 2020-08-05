@@ -16,6 +16,12 @@ import {LabelResolver} from './labelresolver';
 import {Utility} from './utility';
 
 export class OrchestratorEvaluate {
+  public static readonly trainingSetScoresOutputFilename: string = 'orchestrator_training_set_scores.txt';
+
+  public static readonly trainingSetSummaryHtmlOutputFilename: string = 'orchestrator_training_set_summary.html';
+
+  public static readonly trainingSetLabelsOutputFilename: string = 'orchestrator_training_set_labels.txt';
+
   // eslint-disable-next-line max-params
   public static async runAsync(
     inputPath: string, outputPath: string, nlrPath: string = '',
@@ -25,7 +31,7 @@ export class OrchestratorEvaluate {
     unknownLabelPredictionThresholdParameter: number = Utility.DefaultUnknownLabelPredictionThresholdParameter): Promise<void> {
     // ---- NOTE ---- process arguments
     if (Utility.isEmptyString(inputPath)) {
-      Utility.debuggingThrow('Please provide path to an input .blu file');
+      Utility.debuggingThrow(`Please provide path to an input .blu file, CWD=${process.cwd()}, from OrchestratorEvaluate.runAsync()`);
     }
     if (Utility.isEmptyString(outputPath)) {
       Utility.debuggingThrow('Please provide an output directory');
@@ -51,9 +57,9 @@ export class OrchestratorEvaluate {
     if (!Utility.exists(trainingFile)) {
       Utility.debuggingThrow(`training set file does not exist, trainingFile=${trainingFile}`);
     }
-    const trainingSetScoreOutputFile: string = path.join(outputPath, 'orchestrator_training_set_scores.txt');
-    const trainingSetSummaryOutputFile: string = path.join(outputPath, 'orchestrator_training_set_summary.html');
-    const labelsOutputFilename: string = path.join(outputPath, 'orchestrator_labels.txt');
+    const trainingSetScoresOutputFilename: string = path.join(outputPath, OrchestratorEvaluate.trainingSetScoresOutputFilename);
+    const trainingSetSummaryHtmlOutputFilename: string = path.join(outputPath, OrchestratorEvaluate.trainingSetSummaryHtmlOutputFilename);
+    const trainingSetLabelsOutputFilename: string = path.join(outputPath, OrchestratorEvaluate.trainingSetLabelsOutputFilename);
     // ---- NOTE ---- create a labelResolver object with a snapshot
     Utility.debuggingLog('OrchestratorEvaluate.runAsync(), ready to call LabelResolver.createWithSnapshotAsync()');
     const labelResolver: any = await LabelResolver.createWithSnapshotAsync(nlrPath, trainingFile);
@@ -163,9 +169,9 @@ export class OrchestratorEvaluate {
       evaluationOutput.evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringArray,
       evaluationOutput.scoreOutputLines,
       evaluationOutput.evaluationReportAnalyses.evaluationSummary,
-      labelsOutputFilename,
-      trainingSetScoreOutputFile,
-      trainingSetSummaryOutputFile);
+      trainingSetLabelsOutputFilename,
+      trainingSetScoresOutputFilename,
+      trainingSetSummaryHtmlOutputFilename);
     Utility.debuggingLog('OrchestratorTest.runAsync(), finished calling Utility.generateEvaluationReportFiles()');
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
       Utility.debuggingLog(`evaluationOutput=${Utility.jsonStringify(evaluationOutput)}`);

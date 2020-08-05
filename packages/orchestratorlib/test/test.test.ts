@@ -15,6 +15,7 @@ describe('Test Suite - test', () => {
   it('Test.0000 OrchestratorTest.runAsync()', function () {
     Utility.toPrintDebuggingLogToConsole = UnitTestHelper.getDefaultUnitTestDebuggingLogFlag();
     this.timeout(UnitTestHelper.getDefaultUnitTestTimeout());
+    Utility.debuggingLog('THE END - OrchestratorTest.runAsync()');
   });
 });
 

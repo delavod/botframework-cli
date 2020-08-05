@@ -16,6 +16,12 @@ import {OrchestratorHelper} from './orchestratorhelper';
 import {Utility} from './utility';
 
 export class OrchestratorTest {
+  public static readonly testingSetScoresOutputFilename: string = 'orchestrator_testing_set_scores.txt';
+
+  public static readonly testingSetSummaryHtmlOutputFilename: string = 'orchestrator_testing_set_summary.html';
+
+  public static readonly testingSetLabelsOutputFilename: string = 'orchestrator_testing_set_labels.txt';
+
   // eslint-disable-next-line complexity
   // eslint-disable-next-line max-params
   public static async runAsync(
@@ -26,7 +32,7 @@ export class OrchestratorTest {
     unknownLabelPredictionThresholdParameter: number): Promise<void> {
     // ---- NOTE ---- process arguments
     if (Utility.isEmptyString(inputPath)) {
-      Utility.debuggingThrow('Please provide path to an input .blu file');
+      Utility.debuggingThrow(`Please provide path to an input .blu file, CWD=${process.cwd()}, from OrchestratorTest.runAsync()`);
     }
     if (Utility.isEmptyString(testPath)) {
       Utility.debuggingThrow('Please provide a test file');
@@ -55,9 +61,9 @@ export class OrchestratorTest {
     if (!Utility.exists(trainingFile)) {
       Utility.debuggingThrow(`training set file does not exist, trainingFile=${trainingFile}`);
     }
-    const testingSetScoreOutputFile: string = path.join(outputPath, 'orchestrator_testing_set_scores.txt');
-    const testingSetSummaryOutputFile: string = path.join(outputPath, 'orchestrator_testing_set_summary.html');
-    const labelsOutputFilename: string = path.join(outputPath, 'orchestrator_labels.txt');
+    const testingSetScoresOutputFilename: string = path.join(outputPath, OrchestratorTest.testingSetScoresOutputFilename);
+    const testingSetSummaryHtmlOutputFilename: string = path.join(outputPath, OrchestratorTest.testingSetSummaryHtmlOutputFilename);
+    const testingSetLabelsOutputFilename: string = path.join(outputPath, OrchestratorTest.testingSetLabelsOutputFilename);
     // ---- NOTE ---- create a LabelResolver object.
     Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call LabelResolver.createWithSnapshotAsync()');
     const labelResolver: any = await LabelResolver.createWithSnapshotAsync(nlrPath, trainingFile);
@@ -153,9 +159,9 @@ export class OrchestratorTest {
       evaluationOutput.evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringArray,
       evaluationOutput.scoreOutputLines,
       evaluationOutput.evaluationReportAnalyses.evaluationSummary,
-      labelsOutputFilename,
-      testingSetScoreOutputFile,
-      testingSetSummaryOutputFile);
+      testingSetLabelsOutputFilename,
+      testingSetScoresOutputFilename,
+      testingSetSummaryHtmlOutputFilename);
     Utility.debuggingLog('OrchestratorTest.runAsync(), finished calling Utility.generateEvaluationReportFiles()');
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
       Utility.debuggingLog(`evaluationOutput=${Utility.jsonStringify(evaluationOutput)}`);

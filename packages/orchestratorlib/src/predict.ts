@@ -61,16 +61,6 @@ export class OrchestratorPredict {
   static readonly questionForunknownLabelPredictionThreshold: string =
     'Please enter a threshold for unknow label prediction > ';
 
-  static readonly interactive: readline.Interface = readline.createInterface(process.stdin, process.stdout);
-
-  static readonly question: any = function (prefix: string) {
-    return new Promise((resolve: any, _reject: any) => {
-      OrchestratorPredict.interactive.question(prefix, (answer: string) => {
-        resolve(answer);
-      });
-    });
-  };
-
   protected inputPath: string = '';
 
   protected outputPath: string = '';
@@ -93,7 +83,7 @@ export class OrchestratorPredict {
 
   protected labelsOutputFilename: string = '';
 
-  protected trainingFileOutput: string = '';
+  protected predictingSetSnapshotFilename: string = '';
 
   protected labelResolver: any;
 
@@ -166,14 +156,14 @@ export class OrchestratorPredict {
     unknownLabelPredictionThresholdParameter: number) {
     // ---- NOTE ---- process arguments
     if (Utility.isEmptyString(inputPath)) {
-      Utility.debuggingThrow('Please provide path to an input .blu file');
+      Utility.debuggingThrow(`Please provide path to an input .blu file, CWD=${process.cwd()}, from OrchestratorPredict.constructor()`);
     }
     if (Utility.isEmptyString(outputPath)) {
       Utility.debuggingThrow('Please provide an output directory');
     }
-    if (Utility.isEmptyString(nlrPath)) {
-      Utility.debuggingThrow('The nlrPath argument is empty');
-    }
+    // if (Utility.isEmptyString(nlrPath)) {
+    //   Utility.debuggingThrow('The nlrPath argument is empty');
+    // }
     if (nlrPath) {
       nlrPath = path.resolve(nlrPath);
     } else {
@@ -200,19 +190,37 @@ export class OrchestratorPredict {
     // }
     this.predictingSetScoreOutputFilename = path.join(this.outputPath, 'orchestrator_predicting_set_scores.txt');
     this.predictingSetSummaryOutputFilename = path.join(this.outputPath, 'orchestrator_predicting_set_summary.html');
-    this.labelsOutputFilename = path.join(this.outputPath, 'orchestrator_labels.txt');
-    this.trainingFileOutput = path.join(this.outputPath, 'orchestrator.blu');
+    this.labelsOutputFilename = path.join(this.outputPath, 'orchestrator_predicting_set_labels.txt');
+    this.predictingSetSnapshotFilename = path.join(this.outputPath, 'orchestrator_predicting_training_set.blu');
+  }
+
+  public getPredictingSetScoreOutputFilename(): string {
+    return this.predictingSetScoreOutputFilename;
+  }
+
+  public getPredictingSetSummaryOutputFilename(): string {
+    return this.predictingSetSummaryOutputFilename;
+  }
+
+  public getLabelsOutputFilename(): string {
+    return this.labelsOutputFilename;
+  }
+
+  public getPredictingSetSnapshotFilename(): string {
+    return this.predictingSetSnapshotFilename;
   }
 
   public async buildLabelResolver(): Promise<void> {
     // ---- NOTE ---- create a LabelResolver object.
-    Utility.debuggingLog('OrchestratorPredict.runAsync(), ready to call LabelResolver.createWithSnapshotAsync()');
+    Utility.debuggingLog('OrchestratorPredict.buildLabelResolver(), ready to create a LabelResolver object');
     if (Utility.exists(this.trainingFile)) {
+      Utility.debuggingLog('OrchestratorPredict.buildLabelResolver(), ready to call LabelResolver.createWithSnapshotAsync()');
       this.labelResolver = await LabelResolver.createWithSnapshotAsync(this.nlrPath, this.trainingFile);
     } else {
+      Utility.debuggingLog('OrchestratorPredict.buildLabelResolver(), ready to call LabelResolver.createAsync()');
       this.labelResolver = await LabelResolver.createAsync(this.nlrPath);
     }
-    Utility.debuggingLog('OrchestratorPredict.runAsync(), after calling LabelResolver.createWithSnapshotAsync()');
+    Utility.debuggingLog('OrchestratorPredict.buildLabelResolver(), after creating a LabelResolver object');
   }
 
   public static async runAsync(
@@ -231,82 +239,95 @@ export class OrchestratorPredict {
       unknownLabelPredictionThresholdParameter);
     // ---- NOTE ---- create a LabelResolver object.
     await orchestratorPredict.buildLabelResolver();
-    // ---- NOTE ---- prepare readline.
+    // ---- NOTE ---- enter the command loop.
+    return orchestratorPredict.commandLetLoop();
+  }
+
+  public async commandLetLoop(): Promise<number> {
+    // ---- NOTE ---- need to dynamically create an 'interactive' object
+    // ---- NOTE ---- and call close() when it's not needed, otherwise this resource cannot be
+    // ---- NOTE ---- properly disposed of and a unit test on this object will hang.
+    const interactive: readline.Interface = readline.createInterface(process.stdin, process.stdout);
+    const question: any = function (prefix: string) {
+      return new Promise((resolve: any, _reject: any) => {
+        interactive.question(prefix, (answer: string) => {
+          resolve(answer);
+        });
+      });
+    };
     let command: string = '';
     // ---- NOTE ---- enter the interaction loop.
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      console.log(`> "Current" utterance:          "${orchestratorPredict.currentUtterance}"`);
-      console.log(`> "Current" intent label array: "${orchestratorPredict.currentIntentLabels}"`);
-      console.log(`> "New"     intent label array: "${orchestratorPredict.newIntentLabels}"`);
+      this.displayInputs();
       // eslint-disable-next-line no-await-in-loop
-      command = await OrchestratorPredict.question(OrchestratorPredict.commandprefix);
+      command = await question(OrchestratorPredict.commandprefix);
       command = command.trim();
       Utility.debuggingLog(`The command you entered is "${command}"`);
       if (command === 'q') {
         break;
       }
       switch (command) {
-      case 'h': orchestratorPredict.commandLetH();
+      case 'h': this.commandLetH();
         break;
-      case 'd': orchestratorPredict.commandLetD();
+      case 'd': this.commandLetD();
         break;
-      case 's': orchestratorPredict.commandLetS();
-        break;
-      // eslint-disable-next-line no-await-in-loop
-      case 'u': await orchestratorPredict.commandLetU();
-        break;
-      case 'cu': orchestratorPredict.commandLetCU();
+      case 's': this.commandLetS();
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'i': await orchestratorPredict.commandLetI();
+      case 'u': await this.commandLetU(question);
         break;
-      case 'ci': orchestratorPredict.commandLetCI();
-        break;
-      // eslint-disable-next-line no-await-in-loop
-      case 'ni': await orchestratorPredict.commandLetNI();
-        break;
-      case 'cni': orchestratorPredict.commandLetCNI();
-        break;
-      case 'f': orchestratorPredict.commandLetF();
-        break;
-      case 'p': orchestratorPredict.commandLetP();
-        break;
-      case 'v': orchestratorPredict.commandLetV();
+      case 'cu': this.commandLetCU();
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'vd': await orchestratorPredict.commandLetVD();
+      case 'i': await this.commandLetI(question);
+        break;
+      case 'ci': this.commandLetCI();
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'va': await orchestratorPredict.commandLetVA();
+      case 'ni': await this.commandLetNI(question);
+        break;
+      case 'cni': this.commandLetCNI();
+        break;
+      case 'f': this.commandLetF();
+        break;
+      case 'p': this.commandLetP();
+        break;
+      case 'v': this.commandLetV();
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'vm': await orchestratorPredict.commandLetVM();
+      case 'vd': await this.commandLetVD(question);
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'vl': await orchestratorPredict.commandLetVL();
+      case 'va': await this.commandLetVA(question);
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'vat': await orchestratorPredict.commandLetVAT();
+      case 'vm': await this.commandLetVM(question);
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'vlt': await orchestratorPredict.commandLetVLT();
+      case 'vl': await this.commandLetVL(question);
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'vmt': await orchestratorPredict.commandLetVMT();
+      case 'vat': await this.commandLetVAT(question);
         break;
       // eslint-disable-next-line no-await-in-loop
-      case 'vut': await orchestratorPredict.commandLetVUT();
+      case 'vlt': await this.commandLetVLT(question);
         break;
-      case 'a': orchestratorPredict.commandLetA();
+      // eslint-disable-next-line no-await-in-loop
+      case 'vmt': await this.commandLetVMT(question);
         break;
-      case 'r': orchestratorPredict.commandLetR();
+      // eslint-disable-next-line no-await-in-loop
+      case 'vut': await this.commandLetVUT(question);
         break;
-      case 'c': orchestratorPredict.commandLetC();
+      case 'a': this.commandLetA();
         break;
-      case 'rl': orchestratorPredict.commandLetRL();
+      case 'r': this.commandLetR();
         break;
-      case 'n': orchestratorPredict.commandLetN();
+      case 'c': this.commandLetC();
+        break;
+      case 'rl': this.commandLetRL();
+        break;
+      case 'n': this.commandLetN();
         break;
       default:
         console.log(`> Cannot recognize the command you just entered "${command}",`);
@@ -316,6 +337,7 @@ export class OrchestratorPredict {
     }
     // eslint-disable-next-line no-console
     console.log('> Bye!');
+    interactive.close();
     return 0;
   }
 
@@ -356,14 +378,17 @@ export class OrchestratorPredict {
     console.log('          add it with the "new" intent labels to the model example set');
     console.log('    rl  - remove the "current" intent labels from the model example set');
     console.log('    n   - create a new snapshot of model examples and save it to ');
-    console.log(`          ${this.trainingFileOutput}`);
+    console.log(`          ${this.predictingSetSnapshotFilename}`);
     return 0;
   }
 
-  public commandLetD(): number {
+  public displayInputs(): void {
     console.log(`> "Current" utterance:          "${this.currentUtterance}"`);
     console.log(`> "Current" intent label array: "${this.currentIntentLabels}"`);
     console.log(`> "New"     intent label array: "${this.newIntentLabels}"`);
+  }
+
+  public commandLetD(): number {
     console.log(`> Ambiguous closeness:           ${this.ambiguousCloseness}`);
     console.log(`> Low-confidence closeness:      ${this.lowConfidenceScoreThreshold}`);
     console.log(`> Multi-label threshold:         ${this.multiLabelPredictionThreshold}`);
@@ -408,8 +433,12 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetU(): Promise<number> {
-    this.currentUtterance = await OrchestratorPredict.question(OrchestratorPredict.questionForUtterance);
+  public async commandLetU(question: any): Promise<number> {
+    return this.commandLetUwithEntry(await question(OrchestratorPredict.questionForUtterance));
+  }
+
+  public commandLetUwithEntry(entry: string): number {
+    this.currentUtterance = entry;
     return 0;
   }
 
@@ -418,9 +447,12 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetI(): Promise<number> {
-    // eslint-disable-next-line no-await-in-loop
-    let label: string = await OrchestratorPredict.question(OrchestratorPredict.questionForCurrentIntentLabel);
+  public async commandLetI(question: any): Promise<number> {
+    return this.commandLetIwithEntry(await question(OrchestratorPredict.questionForCurrentIntentLabel));
+  }
+
+  public commandLetIwithEntry(entry: string): number {
+    let label: string = entry;
     label = label.trim();
     const errorMessage: string = Utility.parseLabelResolverLabelEntry(
       this.labelResolver,
@@ -438,9 +470,12 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetNI(): Promise<number> {
-    // eslint-disable-next-line no-await-in-loop
-    let label: string = await OrchestratorPredict.question(OrchestratorPredict.questionForNewIntentLabel);
+  public async commandLetNI(question: any): Promise<number> {
+    return this.commandLetNIwithEntry(await question(OrchestratorPredict.questionForNewIntentLabel));
+  }
+
+  public commandLetNIwithEntry(entry: string): number {
+    let label: string = entry;
     label = label.trim();
     const errorMessage: string = Utility.parseLabelResolverLabelEntry(
       this.labelResolver,
@@ -476,6 +511,9 @@ export class OrchestratorPredict {
   }
 
   public commandLetP(): number {
+    if (Utility.isEmptyString(this.nlrPath)) {
+      console.log('> No model is loaded, cannot make a prediction.');
+    }
     Utility.resetLabelResolverSettingIgnoreSameExample(this.labelResolver, false);
     const scoreResults: any = this.labelResolver.score(this.currentUtterance, LabelType.Intent);
     if (!scoreResults) {
@@ -528,7 +566,11 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetVD(): Promise<number> {
+  public async commandLetVD(question: any): Promise<number> {
+    return this.commandLetVDwithEntry(await question(OrchestratorPredict.questionForUtteranceLabelsFromDuplicates));
+  }
+
+  public commandLetVDwithEntry(entry: string): number {
     if (!this.currentEvaluationOutput) {
       console.log('ERROR: There is no validation report, please use the "v" command to create one');
       return -1;
@@ -541,8 +583,7 @@ export class OrchestratorPredict {
     }
     const utterancesMultiLabelArrays: [string, string][] =
     this.currentEvaluationOutput.evaluationReportLabelUtteranceStatistics.utterancesMultiLabelArrays;
-    // eslint-disable-next-line no-await-in-loop
-    let indexInput: string = await OrchestratorPredict.question(OrchestratorPredict.questionForUtteranceLabelsFromDuplicates);
+    let indexInput: string = entry;
     indexInput = indexInput.trim();
     if (Utility.isEmptyString(indexInput)) {
       console.log('ERROR: Please enter an integer index to access the validation Duplicates entry');
@@ -566,7 +607,11 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetVA(): Promise<number> {
+  public async commandLetVA(question: any): Promise<number> {
+    return this.commandLetVAwithEntry(await question(OrchestratorPredict.questionForUtteranceLabelsFromAmbiguous));
+  }
+
+  public commandLetVAwithEntry(entry: string): number {
     if (!this.currentEvaluationOutput) {
       console.log('ERROR: There is no validation report, please use the "v" command to create one');
       return -1;
@@ -579,8 +624,7 @@ export class OrchestratorPredict {
     }
     const scoringAmbiguousUtterancesSimpleArrays: string[][] =
     this.currentEvaluationOutput.evaluationReportAnalyses.ambiguousAnalysis.scoringAmbiguousUtteranceSimpleArrays;
-    // eslint-disable-next-line no-await-in-loop
-    let indexInput: string = await OrchestratorPredict.question(OrchestratorPredict.questionForUtteranceLabelsFromAmbiguous);
+    let indexInput: string = entry;
     indexInput = indexInput.trim();
     if (Utility.isEmptyString(indexInput)) {
       console.log('ERROR: Please enter an integer index to access the validation Ambiguous entry');
@@ -604,7 +648,11 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetVM(): Promise<number> {
+  public async commandLetVM(question: any): Promise<number> {
+    return this.commandLetVMwithEntry(await question(OrchestratorPredict.questionForUtteranceLabelsFromMisclassified));
+  }
+
+  public commandLetVMwithEntry(entry: string): number {
     if (!this.currentEvaluationOutput) {
       console.log('ERROR: There is no validation report, please use the "v" command to create one');
       return -1;
@@ -617,8 +665,7 @@ export class OrchestratorPredict {
     }
     const scoringMisclassifiedUtterancesSimpleArrays: string[][] =
     this.currentEvaluationOutput.evaluationReportAnalyses.misclassifiedAnalysis.scoringMisclassifiedUtterancesSimpleArrays;
-    // eslint-disable-next-line no-await-in-loop
-    let indexInput: string = await OrchestratorPredict.question(OrchestratorPredict.questionForUtteranceLabelsFromMisclassified);
+    let indexInput: string = entry;
     indexInput = indexInput.trim();
     if (Utility.isEmptyString(indexInput)) {
       console.log('ERROR: Please enter an integer index to access the validation Misclassified entry');
@@ -642,7 +689,11 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetVL(): Promise<number> {
+  public async commandLetVL(question: any): Promise<number> {
+    return this.commandLetVLwithEntry(await question(OrchestratorPredict.questionForUtteranceLabelsFromLowConfidence));
+  }
+
+  public commandLetVLwithEntry(entry: string): number {
     if (!this.currentEvaluationOutput) {
       console.log('ERROR: There is no validation report, please use the "v" command to create one');
       return -1;
@@ -655,10 +706,7 @@ export class OrchestratorPredict {
     }
     const scoringLowConfidenceUtterancesSimpleArrays: string[][] =
     this.currentEvaluationOutput.evaluationReportAnalyses.lowConfidenceAnalysis.scoringLowConfidenceUtterancesSimpleArrays;
-    // eslint-disable-next-line no-await-in-loop
-    const questionForUtteranceLabelsFromLowConfidence: string =
-      'Please enter an index from the LowConfidence report > ';
-    let indexInput: string = await OrchestratorPredict.question(questionForUtteranceLabelsFromLowConfidence);
+    let indexInput: string = entry;
     indexInput = indexInput.trim();
     if (Utility.isEmptyString(indexInput)) {
       console.log('ERROR: Please enter an integer index to access the validation LowConfidence entry');
@@ -682,8 +730,12 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetVAT(): Promise<number> {
-    const ambiguousClosenessParameter: string = await OrchestratorPredict.question(OrchestratorPredict.questionForAmbiguousThreshold);
+  public async commandLetVAT(question: any): Promise<number> {
+    return this.commandLetVATwithEntry(await question(OrchestratorPredict.questionForAmbiguousThreshold));
+  }
+
+  public commandLetVATwithEntry(entry: string): number {
+    const ambiguousClosenessParameter: string = entry;
     const ambiguousCloseness: number = Number(ambiguousClosenessParameter);
     if (Number.isNaN(ambiguousCloseness)) {
       Utility.debuggingLog(`The input "${ambiguousClosenessParameter}" is not a number.`);
@@ -693,8 +745,12 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetVLT(): Promise<number> {
-    const lowConfidenceScoreThresholdParameter: string = await OrchestratorPredict.question(OrchestratorPredict.questionForLowConfidenceThreshold);
+  public async commandLetVLT(question: any): Promise<number> {
+    return this.commandLetVLTwithEntry(await question(OrchestratorPredict.questionForLowConfidenceThreshold));
+  }
+
+  public commandLetVLTwithEntry(entry: string): number {
+    const lowConfidenceScoreThresholdParameter: string = entry;
     const lowConfidenceScoreThreshold: number = Number(lowConfidenceScoreThresholdParameter);
     if (Number.isNaN(lowConfidenceScoreThreshold)) {
       Utility.debuggingLog(`The input "${lowConfidenceScoreThresholdParameter}" is not a number.`);
@@ -704,8 +760,12 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetVMT(): Promise<number> {
-    const multiLabelPredictionThresholdParameter: string = await OrchestratorPredict.question(OrchestratorPredict.questionForAmbiguousThreshold);
+  public async commandLetVMT(question: any): Promise<number> {
+    return this.commandLetVMTwithEntry(await question(OrchestratorPredict.questionForMultiLabelPredictionThreshold));
+  }
+
+  public commandLetVMTwithEntry(entry: string): number {
+    const multiLabelPredictionThresholdParameter: string = entry;
     const multiLabelPredictionThreshold: number = Number(multiLabelPredictionThresholdParameter);
     if (Number.isNaN(multiLabelPredictionThreshold)) {
       Utility.debuggingLog(`The input "${multiLabelPredictionThresholdParameter}" is not a number.`);
@@ -715,8 +775,12 @@ export class OrchestratorPredict {
     return 0;
   }
 
-  public async commandLetVUT(): Promise<number> {
-    const unknownLabelPredictionThresholdParameter: string = await OrchestratorPredict.question(OrchestratorPredict.questionForLowConfidenceThreshold);
+  public async commandLetVUT(question: any): Promise<number> {
+    return this.commandLetVUTwithEntry(await question(OrchestratorPredict.questionForunknownLabelPredictionThreshold));
+  }
+
+  public commandLetVUTwithEntry(entry: string): number {
+    const unknownLabelPredictionThresholdParameter: string = entry;
     const unknownLabelPredictionThreshold: number = Number(unknownLabelPredictionThresholdParameter);
     if (Number.isNaN(unknownLabelPredictionThreshold)) {
       Utility.debuggingLog(`The input "${unknownLabelPredictionThresholdParameter}" is not a number.`);
@@ -803,9 +867,9 @@ export class OrchestratorPredict {
 
   public commandLetN(): number {
     const snapshot: any = this.labelResolver.createSnapshot();
-    OrchestratorHelper.writeToFile(this.trainingFileOutput, snapshot);
-    Utility.debuggingLog(`Snapshot written to ${this.trainingFileOutput}`);
-    console.log(`> A new snapshot has been saved to '${this.trainingFileOutput}'`);
+    OrchestratorHelper.writeToFile(this.predictingSetSnapshotFilename, snapshot);
+    Utility.debuggingLog(`Snapshot written to ${this.predictingSetSnapshotFilename}`);
+    console.log(`> A new snapshot has been saved to '${this.predictingSetSnapshotFilename}'`);
     return 0;
   }
 }

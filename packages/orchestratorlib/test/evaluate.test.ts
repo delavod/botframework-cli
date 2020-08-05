@@ -26,9 +26,9 @@ describe('Test Suite - evaluate', () => {
     const lowConfidenceScoreThresholdParameter: number = Utility.DefaultLowConfidenceScoreThresholdParameter;
     const multiLabelPredictionThresholdParameter: number = Utility.DefaultMultiLabelPredictionThresholdParameter;
     const unknownLabelPredictionThresholdParameter: number = Utility.DefaultUnknownLabelPredictionThresholdParameter;
-    const trainingSetScoreOutputFile: string = path.join(outputPath, 'orchestrator_training_set_scores.txt');
-    const trainingSetSummaryOutputFile: string = path.join(outputPath, 'orchestrator_training_set_summary.html');
-    const labelsOutputFilename: string = path.join(outputPath, 'orchestrator_labels.txt');
+    const trainingSetScoresOutputFilename: string = path.join(outputPath, OrchestratorEvaluate.trainingSetScoresOutputFilename);
+    const trainingSetSummaryHtmlOutputFilename: string = path.join(outputPath, OrchestratorEvaluate.trainingSetSummaryHtmlOutputFilename);
+    const trainingSetLabelsOutputFilename: string = path.join(outputPath, OrchestratorEvaluate.trainingSetLabelsOutputFilename);
     await OrchestratorEvaluate.runAsync(
       inputPath,
       outputPath,
@@ -37,13 +37,18 @@ describe('Test Suite - evaluate', () => {
       lowConfidenceScoreThresholdParameter,
       multiLabelPredictionThresholdParameter,
       unknownLabelPredictionThresholdParameter);
+    // ---- NOTE ---- clean up after unit tests.
     const toCleanUpAfterUnitTest: boolean = UnitTestHelper.getDefaultUnitTestCleanUpFlag();
     if (toCleanUpAfterUnitTest) {
-      Utility.deleteFile(trainingSetScoreOutputFile);
-      Utility.deleteFile(trainingSetSummaryOutputFile);
-      Utility.deleteFile(labelsOutputFilename);
-      fs.rmdirSync(outputPath);
+      try {
+        Utility.deleteFile(trainingSetScoresOutputFilename);
+        Utility.deleteFile(trainingSetSummaryHtmlOutputFilename);
+        Utility.deleteFile(trainingSetLabelsOutputFilename);
+        fs.rmdirSync(outputPath);
+      } catch (error) {
+      }
     }
+    Utility.debuggingLog('THE END - Test.0000 OrchestratorEvaluate.runAsync()');
   });
 });
 

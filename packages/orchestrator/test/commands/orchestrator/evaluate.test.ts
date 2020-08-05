@@ -22,8 +22,8 @@ describe('orchestrator:evaluate', () => {
 
   test
   .stdout()
-  .command(['orchestrator:evaluate', '--debug', '--in=resources/data/Columnar/Email.txt', '--out=resources/data/Columnar/OrchestratorModelForEvaluateCommand_Email'])
-  .it('Test.0002 orchestrator:evaluate Email.txt', (ctx: any) => {
+  .command(['orchestrator:evaluate', '--debug', '--in=resources/data/Columnar/Email.blu', '--out=resources/data/Columnar/OrchestratorModelForEvaluateCommand_Email'])
+  .it('Test.0002 orchestrator:evaluate Email.blu', (ctx: any) => {
     expect(ctx.stdout).to.contain('Email');
   });
 });
