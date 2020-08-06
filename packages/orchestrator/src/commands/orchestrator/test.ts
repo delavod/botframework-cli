@@ -18,8 +18,8 @@ export default class OrchestratorTest extends Command {
   static flags: flags.Input<any> = {
     in: flags.string({char: 'i', description: 'Path to a previously created Orchestrator .blu file.'}),
     test: flags.string({char: 't', description: 'Path to a test file.'}),
-    out: flags.string({char: 'o', description: 'Directory where analysis files will be placed.'}),
-    model: flags.string({char: 'm', description: 'Directory or a config file hosting Orchestrator model files.'}),
+    out: flags.string({char: 'o', description: 'Directory where analysis and output files will be placed.'}),
+    model: flags.string({char: 'm', description: 'Directory or hosting Orchestrator config and model files.'}),
     ambiguous: flags.string({char: 'a', description: `Ambiguous threshold, default to ${Utility.DefaultAmbiguousClosenessParameter}`}),
     low_confidence: flags.string({char: 'l', description: `Low confidence threshold, default to ${Utility.DefaultLowConfidenceScoreThresholdParameter}`}),
     multi_label: flags.string({char: 'p', description: `Plural/multi-label prediction threshold, default to ${Utility.DefaultMultiLabelPredictionThresholdParameter}`}),
@@ -76,8 +76,8 @@ export default class OrchestratorTest extends Command {
     Utility.debuggingLog(`OrchestratorTest.run(): nlrPath=${nlrPath}`);
     Utility.debuggingLog(`OrchestratorTest.run(): ambiguousClosenessParameter=${ambiguousClosenessParameter}`);
     Utility.debuggingLog(`OrchestratorTest.run(): lowConfidenceScoreThresholdParameter=${lowConfidenceScoreThresholdParameter}`);
-    Utility.debuggingLog(`OrchestratorEvaluate.run(): multiLabelPredictionThresholdParameter=${multiLabelPredictionThresholdParameter}`);
-    Utility.debuggingLog(`OrchestratorEvaluate.run(): unknownLabelPredictionThresholdParameter=${unknownLabelPredictionThresholdParameter}`);
+    Utility.debuggingLog(`OrchestratorTest.run(): multiLabelPredictionThresholdParameter=${multiLabelPredictionThresholdParameter}`);
+    Utility.debuggingLog(`OrchestratorTest.run(): unknownLabelPredictionThresholdParameter=${unknownLabelPredictionThresholdParameter}`);
 
     try {
       await Orchestrator.testAsync(

@@ -8,8 +8,8 @@ import * as path from 'path';
 import {MultiLabelConfusionMatrix} from '@microsoft/bf-dispatcher';
 import {MultiLabelConfusionMatrixSubset} from '@microsoft/bf-dispatcher';
 
-import {LabelType} from './label-type';
-import {ScoreStructure}  from './score-structure';
+import {LabelType} from './labeltype';
+import {ScoreStructure}  from './scorestructure';
 
 import {LabelResolver} from './labelresolver';
 
@@ -87,7 +87,7 @@ export class OrchestratorEvaluate {
       const labels: any = example.labels;
       const label: any = labels[0];
       const label_name: string = label.name;
-      const label_type: any = label.label_type;
+      const labeltype: any = label.labeltype;
       const span: any = label.span;
       const offset: number = span.offset;
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), examples.length=${examples.length}`);
@@ -101,7 +101,7 @@ export class OrchestratorEvaluate {
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), JSON.stringify(label)=${JSON.stringify(label)}`);
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), Object.keys(label)=${Object.keys(label)}`);
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), label.name=${label_name}`);
-      Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), label.label_type=${label_type}`);
+      Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), label.labeltype=${labeltype}`);
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), JSON.stringify(span)=${JSON.stringify(span)}`);
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), Object.keys(span)=${Object.keys(span)}`);
       Utility.debuggingLog(`OrchestratorEvaluate.runAsync(), label.span.offset=${offset}`);

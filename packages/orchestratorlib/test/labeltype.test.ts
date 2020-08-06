@@ -7,11 +7,11 @@ import assert = require('assert');
 
 import {} from 'mocha';
 
-import {LabelType} from '../src/label-type';
+import {LabelType} from '../src/labeltype';
 import {Utility} from '../src/utility';
 import {UnitTestHelper} from './utility.test';
 
-describe('Test Suite - label-type', () => {
+describe('Test Suite - labeltype', () => {
   it('Test.0000 LabelType - constructor()', function () {
     Utility.toPrintDebuggingLogToConsole = UnitTestHelper.getDefaultUnitTestDebuggingLogFlag();
     this.timeout(UnitTestHelper.getDefaultUnitTestTimeout());

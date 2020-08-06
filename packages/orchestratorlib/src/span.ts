@@ -20,6 +20,19 @@ export class Span {
     };
   }
 
+  public equals(other: Span): boolean {
+    if (other) {
+      if (other.offset !== this.offset) {
+        return false;
+      }
+      if (other.length !== this.length) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
   public offset: number;
 
   public length: number;

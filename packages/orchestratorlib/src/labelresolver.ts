@@ -40,7 +40,7 @@ export class LabelResolver {
     await LabelResolver.loadNlrAsync(nlrPath);
     Utility.debuggingLog('LabelResolver.createAsync(): Creating labeler...');
     LabelResolver.LabelResolver = LabelResolver.Orchestrator.createLabelResolver();
-    Utility.debuggingLog('LabelResolver.createAsync(): Done creating labeler...');
+    Utility.debuggingLog('LabelResolver.createAsync(): Finished creating labeler...');
     return LabelResolver.LabelResolver;
   }
 
@@ -53,11 +53,10 @@ export class LabelResolver {
     Utility.debuggingLog(`LabelResolver.createWithSnapshotAsync(): snapshot.byteLength=${snapshot.byteLength}`);
     Utility.debuggingLog('LabelResolver.createWithSnapshotAsync(): Creating labeler...');
     LabelResolver.LabelResolver = await LabelResolver.Orchestrator.createLabelResolver(snapshot);
-    if (!LabelResolver) {
-      // eslint-disable-next-line no-console
-      console.log('FAILED to create a LabelResolver object');
+    if (!LabelResolver.LabelResolver) {
+      Utility.debuggingThrow('FAILED to create a LabelResolver object');
     }
-    Utility.debuggingLog('LabelResolver.createWithSnapshotAsync(): Done creating labeler...');
+    Utility.debuggingLog('LabelResolver.createWithSnapshotAsync(): Finished creating labeler...');
     return LabelResolver.LabelResolver;
   }
 

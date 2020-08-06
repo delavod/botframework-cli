@@ -12,10 +12,10 @@ import {MultiLabelConfusionMatrixSubset} from '@microsoft/bf-dispatcher';
 
 import {Example} from './example';
 import {Label} from './label';
-import {LabelType} from './label-type';
+import {LabelType} from './labeltype';
 import {OrchestratorHelper} from './orchestratorhelper';
 import {Result} from './result';
-import {ScoreStructure} from './score-structure';
+import {ScoreStructure} from './scorestructure';
 import {Span} from './span';
 
 import {EvaluationSummaryTemplateHtml} from './resources/evaluation-summary-template-html';
@@ -113,7 +113,9 @@ export class Utility {
     } = {
       ignore_same_example: ignoreSameExample,
     };
+    Utility.debuggingLog(`read to call labelResolver.setRuntimeParams(), ignoreSameExampleObject=${ignoreSameExampleObject}`);
     labelResolver.setRuntimeParams(Utility.jsonStringify(ignoreSameExampleObject), false);
+    Utility.debuggingLog(`read to call Utility.getLabelResolverSettings(), labelResolver=${labelResolver}`);
     return Utility.getLabelResolverSettings(labelResolver);
   }
 
@@ -1106,7 +1108,7 @@ export class Utility {
         }
         const labelsPredictedConcatenated: string = labelsPredicted.join(',');
         const labelsPredictedEvaluation: number = Utility.evaluateMultiLabelPrediction(labels, labelsPredicted);
-        const labelsPredictedClosestText: string[] = labelsPredictedIndexes.map((x: number) => scoreResultArray[x].closest_text);
+        const labelsPredictedClosestText: string[] = labelsPredictedIndexes.map((x: number) => scoreResultArray[x].closesttext);
         const predictedScoreStructureHtmlTable: string = Utility.selectedScoreResultsToHtmlTable(
           scoreResultArray,
           labelsPredictedIndexes,
@@ -1140,20 +1142,20 @@ export class Utility {
             // eslint-disable-next-line max-depth
             if (result) {
               Utility.debuggingLog(`Utility.score(), result=${JSON.stringify(result)}`);
-              const closest_text: string = result.closest_text;
+              const closesttext: string = result.closesttext;
               const score: number = result.score;
               const label: any = result.label;
-              const label_name: string = label.name;
-              const label_type: any = label.label_type;
+              const labelname: string = label.name;
+              const labeltype: LabelType = label.labeltype;
               const span: any = label.span;
               const offset: number = span.offset;
               const length: number = span.length;
-              Utility.debuggingLog(`Utility.score(), closest_text=${closest_text}`);
+              Utility.debuggingLog(`Utility.score(), closesttext=${closesttext}`);
               Utility.debuggingLog(`Utility.score(), score=${score}`);
               Utility.debuggingLog(`Utility.score(), JSON.stringify(label)=${JSON.stringify(label)}`);
               Utility.debuggingLog(`Utility.score(), Object.keys(label)=${Object.keys(label)}`);
-              Utility.debuggingLog(`Utility.score(), label.name=${label_name}`);
-              Utility.debuggingLog(`Utility.score(), label.label_type=${label_type}`);
+              Utility.debuggingLog(`Utility.score(), label.name=${labelname}`);
+              Utility.debuggingLog(`Utility.score(), label.labeltype=${labeltype}`);
               Utility.debuggingLog(`Utility.score(), JSON.stringify(span)=${JSON.stringify(span)}`);
               Utility.debuggingLog(`Utility.score(), Object.keys(span)=${Object.keys(span)}`);
               Utility.debuggingLog(`Utility.score(), label.span.offset=${offset}`);
@@ -1263,7 +1265,7 @@ export class Utility {
     selectedOutputDataArraryHeaders: string[] = [],
     outputDataColumnWidthSettings: string[] = []): string {
     const labelsSelectedArrays: any[][] = indexes.map(
-      (x: number) => [scoreResultArray[x].label.name, scoreResultArray[x].score, scoreResultArray[x].closest_text]);
+      (x: number) => [scoreResultArray[x].label.name, scoreResultArray[x].score, scoreResultArray[x].closesttext]);
     const selectedScoreStructureHtmlTable: string = Utility.convertDataArraysToHtmlTable(
       tableDescription,
       labelsSelectedArrays,
@@ -1719,13 +1721,13 @@ export class Utility {
     const exampleStructureArray: Example[] = [];
     for (const example of examples) {
       const labels: Label[] = [];
-      for (const example_label of example.labels) {
-        const label: string = example_label.name;
-        const label_type: number = example_label.label_type;
-        const label_span: any = example_label.span;
-        const label_span_offset: number = label_span.offset;
-        const label_span_length: number = label_span.length;
-        const labelStructure: Label = new Label(label_type, label, new Span(label_span_offset, label_span_length));
+      for (const examplelabel of example.labels) {
+        const label: string = examplelabel.name;
+        const labeltype: LabelType = examplelabel.labeltype;
+        const labelspan: any = examplelabel.span;
+        const labelspanoffset: number = labelspan.offset;
+        const labelspanlength: number = labelspan.length;
+        const labelStructure: Label = new Label(labeltype, label, new Span(labelspanoffset, labelspanlength));
         labels.push(labelStructure);
       }
       const exampleStructure: Example = new Example(example.text, labels);
@@ -1742,17 +1744,17 @@ export class Utility {
     for (const result of results) {
       if (result) {
         const score: number = Utility.round(result.score, digits);
-        const result_label: any = result.label;
-        const label: string = result_label.name;
-        const label_type: number = result_label.label_type;
-        const label_span: any = result_label.span;
-        const label_span_offset: number = label_span.offset;
-        const label_span_length: number = label_span.length;
-        const closest_text: string = result.closest_text;
+        const resultlabel: any = result.label;
+        const label: string = resultlabel.name;
+        const labeltype: LabelType = resultlabel.labeltype;
+        const labelspan: any = resultlabel.span;
+        const labelspanoffset: number = labelspan.offset;
+        const labelspanlength: number = labelspan.length;
+        const closesttext: string = result.closesttext;
         const scoreResult: Result = new Result(
-          new Label(label_type, label, new Span(label_span_offset, label_span_length)),
+          new Label(labeltype, label, new Span(labelspanoffset, labelspanlength)),
           score,
-          closest_text);
+          closesttext);
         const labelIndex: number = labelIndexMap[label];
         if (labelIndex >= 0) {
           scoreResultArray[labelIndex] = scoreResult;
@@ -1857,6 +1859,28 @@ export class Utility {
       stringSet.add(value);
     }
     return stringKeyStringSetMap;
+  }
+
+  public static insertStringLabelPairToStringIdLabelSetNativeMap(
+    key: string,
+    value: Label,
+    stringKeyLabelSetMap: Map<string, Set<Label>>): Map<string, Set<Label>> {
+    if (!stringKeyLabelSetMap) {
+      stringKeyLabelSetMap = new Map<string, Set<Label>>();
+    }
+    if (key in stringKeyLabelSetMap) {
+      let labelSet: Set<Label> | undefined = stringKeyLabelSetMap.get(key);
+      if (!labelSet) {
+        labelSet = new Set<Label>();
+        stringKeyLabelSetMap.set(key, labelSet);
+      }
+      labelSet.add(value);
+    } else {
+      const labelSet: Set<Label> = new Set<Label>();
+      stringKeyLabelSetMap.set(key, labelSet);
+      labelSet.add(value);
+    }
+    return stringKeyLabelSetMap;
   }
 
   public static countMapValues(inputStringToStringArrayMap: { [id: string]: string[] }): number {

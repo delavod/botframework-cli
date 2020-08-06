@@ -6,25 +6,25 @@
 import {Label}  from './label';
 
 export class Result {
-  constructor(label: Label, score: number, closest_text: string) {
+  constructor(label: Label, score: number, closesttext: string) {
     this.label = label;
     this.score = score;
-    this.closest_text = closest_text;
+    this.closesttext = closesttext;
   }
 
   public toObject(): {
     'label': {
       'name': string;
-      'label_type': number;
+      'labeltype': number;
       'span': {
         'offset': number;
         'length': number; }; };
     'score': number;
-    'closest_text': string; } {
+    'closesttext': string; } {
     return {
       label: this.label.toObject(),
       score: this.score,
-      closest_text: this.closest_text,
+      closesttext: this.closesttext,
     };
   }
 
@@ -32,5 +32,5 @@ export class Result {
 
   public score: number;
 
-  public closest_text: string;
+  public closesttext: string;
 }
