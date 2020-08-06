@@ -8,7 +8,7 @@ import * as path from 'path';
 import {MultiLabelConfusionMatrix} from '@microsoft/bf-dispatcher';
 import {MultiLabelConfusionMatrixSubset} from '@microsoft/bf-dispatcher';
 
-import {ScoreStructure}  from './score-structure';
+import {ScoreStructure}  from './scorestructure';
 
 import {LabelResolver} from './labelresolver';
 import {OrchestratorHelper} from './orchestratorhelper';

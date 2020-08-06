@@ -8,7 +8,7 @@ import assert = require('assert');
 import {} from 'mocha';
 
 import {Label} from '../src/label';
-import {LabelType} from '../src/label-type';
+import {LabelType} from '../src/labeltype';
 import {Span} from '../src/span';
 import {Result} from '../src/result';
 import {Utility} from '../src/utility';
@@ -23,21 +23,21 @@ describe('Test Suite - result', () => {
     const resultObject: {
       label: {
           name: string;
-          label_type: number;
+          labeltype: number;
           span: {
               offset: number;
               length: number;
           };
       };
       score: number;
-      closest_text: string;
+      closesttext: string;
     } = result.toObject();
     assert.ok(resultObject.label.name === 'label');
-    assert.ok(resultObject.label.label_type === 1);
+    assert.ok(resultObject.label.labeltype === 1);
     assert.ok(resultObject.label.span.offset === 0);
     assert.ok(resultObject.label.span.length === 0);
     assert.ok(resultObject.score === 0.99);
-    assert.ok(resultObject.closest_text === 'utterance');
+    assert.ok(resultObject.closesttext === 'utterance');
   });
 });
 

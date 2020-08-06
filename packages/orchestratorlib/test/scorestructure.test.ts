@@ -8,14 +8,14 @@ import assert = require('assert');
 import {} from 'mocha';
 
 import {Label} from '../src/label';
-import {LabelType} from '../src/label-type';
+import {LabelType} from '../src/labeltype';
 import {Span} from '../src/span';
 import {Result} from '../src/result';
-import {ScoreStructure} from '../src/score-structure';
+import {ScoreStructure} from '../src/scorestructure';
 import {Utility} from '../src/utility';
 import {UnitTestHelper} from './utility.test';
 
-describe('Test Suite - score-structure', () => {
+describe('Test Suite - scorestructure', () => {
   it('Test.0000 ScoreStructure - constructor()', function () {
     Utility.toPrintDebuggingLogToConsole = UnitTestHelper.getDefaultUnitTestDebuggingLogFlag();
     this.timeout(UnitTestHelper.getDefaultUnitTestTimeout());

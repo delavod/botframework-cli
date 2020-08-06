@@ -78,13 +78,13 @@ OPTIONS
   -i, --in=in                     Path to a previously created Orchestrator .blu file.
   -l, --low_confidence=threshold  Low confidence analysis threshold. Default to 0.5.
   -m, --model=model               Directory or a config file hosting Orchestrator model files. Optional.
-  -o, --out=out                   Directory where analysis files will be placed.
+  -o, --out=out                   Directory where analysis and output files will be placed.
   -p, --multi_label=threshold     Plural/multi-label prediction threshold, default to 1,
                                   i.e., only max-score intents are predicted
   -u, --unknown=threshold         Unknow label threshold, default to 0.3.
-```
 
 DESCRIPTION
+
   The 'evaluate' command can execute a leave-one-out-cross-validation (LOOCV) on a model and example set, then
   generate a detailed evaluation report which has the following sections:
   1) Intent/utterancce Statistics - intent and utterance statistics and distributions.
@@ -98,6 +98,7 @@ DESCRIPTION
   6) Metrics - test confisuon matrix metrics.
 
 EXAMPLE
+```
 
 _See code: [src\commands\orchestrator\evaluate.ts](https://github.com/microsoft/botframework-cli/blob/v1.0.0/src\commands\orchestrator\evaluate.ts)_
 
@@ -166,73 +167,94 @@ Returns score of given utterance using previously created orchestrator examples
 
 ```
 USAGE
-  $ bf orchestrator:predict
+    $ bf orchestrator:predict --out=<analysis-and-output-folder> --model=<model-and-config-folder>[--in=<previous-generated-blu-training-set-file>]
 
 OPTIONS
   -a, --ambiguous=threshold       Ambiguous analysis threshild. Default to 0.2.
   -d, --debug                     Print debugging information during execution.
   -h, --help                      Orchestrator 'predict' command help.
-  -i, --in=in                     Path to a previously created Orchestrator .blu file. Optional.
+  -i, --in=in                     Optional path to a previously created Orchestrator .blu file.
   -l, --low_confidence=threshold  Low confidence analysis threshold. Default to 0.5.
   -m, --model=model               Directory or a config file hosting Orchestrator model files.
-  -o, --out=out                   Directory where analysis files will be placed.
+  -o, --out=out                   Directory where analysis and output files will be placed.
   -p, --multi_label=threshold     Plural/multi-label prediction threshold, default to 1,
                                   i.e., only max-score intents are predicted
   -u, --unknown=threshold         Unknow label threshold, default to 0.3.
-```
 
 DESCRIPTION
-  The 'predict' command is an interactive process that can help a user doing the following
-  1) Predict the intent of an input utterance using the 'p' commandlet.
-  2) Analyze a model example set, by executing the 'v' (validation) commandlet and produce an evaluation
-     report in real-time.
-  3) Add, remove, or change the intents of an input utterace using the 'a', 'r', and 'c' commandlets,
-     respectively. Users can reference a validation report and choose an ambiguous, misclassified, or
-     low-confidence utterance and change their intent labels.
-  4) Remove some labels completely from the model example set using the 'rl' commandlet.
-  5) Create a new model example set snapshot using the 'n' commandlet.
+
+  The 'predict' command is an interactive session that a user can access an Orchestrator model in real-time
+  doing following:
+    1) Predict the intent of an input utterance using the 'p' commandlet.
+    2) Analyze a model example set, by executing the 'v' (validation) commandlet and produce an evaluation
+       report in real-time.
+    3) Add, remove, or change the intents of an input utterace using the 'a', 'r', and 'c' commandlets,
+       respectively. Users can reference a validation report and choose an ambiguous, misclassified, or
+       low-confidence utterance and change their intent labels.
+    4) Remove some labels completely from the model example set using the 'rl' commandlet.
+    5) Create a new model example set snapshot using the 'n' commandlet.
 
   Below is a list of the commandlets that can be issued during a 'predict' session.
 
-  Commandlets: h, q, d, s, u, cu, i, ci, ni, cni, q, p, v, vd, va, vm, vl, a, r, c, rl, n
+  Commandlets: h, q, d, s, u, cu, i, ci, ni, cni, q, p, v,
+               vd, va, vm, vl, vat, vlt, vmt, vut, a, r, c, rl, n
     h   - print this help message
     q   - quit
-    d   - display utterance, intent label array inputs, Orchestrator config, and the label-index map
+    d   - display utterance, intent label array inputs, Orchestrator config,
           and the label-index map
     s   - show label-utterance statistics of the model examples
     u   - enter a new utterance and save it as the "current" utterance input
     cu  - clear the "current" utterance input
-    i   - enter an intent and add it to the "current" intent label array input 
+    i   - enter an intent and add it to the "current" intent label array input
           (can be an index for retrieving a label from the label-index map)
     ci  - clear the "current" intent label array input
-    ni  - enter an intent and add it to the "new" intent label array input 
+    ni  - enter an intent and add it to the "new" intent label array input
           (can be an index for retrieving a label from the label-index map)
     cni - clear the "new" intent label array input
-    f   - find the "current" utterance and see if it is already in the model example set
+    f   - find the "current" utterance if it is already in the model example set
     p   - make a prediction on the "current" utterance input
-    v   - validate the model and save analyses (validation report) to 
-          "${this.predictingSetSummaryOutputFilename}"`);
-    vd  - reference the validation Duplicates report (previously generated by the "v" command) 
-          and enter an index for retrieving utterance/intents and save them into "current"
-    va  - reference the validation Ambiguous report (previously generated by the "v" command) 
-          and enter an index for retrieving utterance/intents and save them into "current"
-    vm  - reference the validation Misclassified report (previously generated by the "v" command) 
-          and enter an index for retrieving utterance/intents and save them into "current"
-    vl  - reference the validation LowConfidence report (previously generated by the "v" command) 
-          and enter an index for retrieving utterance/intents and save them into "current"
+    v   - validate the model and save analyses (validation report) to
+          "experiment_predicting_va\orchestrator_predicting_set_summary.html"
+    vd  - reference a validation Duplicates report
+          (previously generated by the "v" command) and enter an index
+          for retrieving utterance/intents into "current"
+    va  - reference a validation Ambiguous report
+          (previously generated by the "v" command) and enter an index
+          for retrieving utterance/intents into "current"
+    vm  - reference a validation Misclassified report and enter an index
+          (previously generated by the "v" command)
+          for retrieving utterance/intents into "current"
+    vl  - reference a validation LowConfidence report
+          (previously generated by the "v" command) and enter an index
+          for retrieving utterance/intents into "current"
     vat - enter a new validation-report ambiguous closeness threshold
     vlt - enter a new validation-report low-confidence threshold
     vmt - enter a new multi-label threshold
     vut - enter a new unknown-label threshold
     a   - add the "current" utterance and intent labels to the model example set
     r   - remove the "current" utterance and intent labels from the model example set
-    c   - remove the "current" utterance\'s intent labels and then 
+    c   - remove the "current" utterance's intent labels and then
           add it with the "new" intent labels to the model example set
     rl  - remove the "current" intent labels from the model example set
-    n   - create a new snapshot of model examples and save it to 
-          ${this.trainingFileOutput}
+    n   - create a new snapshot of model examples and save it to
+          "experiment_predicting_va\orchestrator_predicting_training_set.blu"
 
 EXAMPLE
+
+      $ bf orchestrator:predict --out=resources\data\Columnar\PredictOutput --model=resources\data\Columnar\ModelConfig --in=resources\data\Columnar\Email.blu
+
+      Notice that inside the ".../ModelConfig" directory, there is a "config.json" that specifies downloaded model files
+      among other hyper parameters. Here is an example: 
+      {
+        "LoadModel": true,
+        "VocabFile": "vocab.json",
+        "MergeFile": "merges.txt",
+        "ModelFile": "traced_model.onnx",
+        "Version": "1.0.0-pretrained.20200729.microsoft.dte.en.onnx"
+      }
+
+
+```
 
 _See code: [src\commands\orchestrator\predict.ts](https://github.com/microsoft/botframework-cli/blob/v1.0.0/src\commands\orchestrator\predict.ts)_
 
@@ -251,17 +273,16 @@ OPTIONS
   -i, --in=in                     Path to a previously created Orchestrator .blu file.
   -l, --low_confidence=threshold  Low confidence analysis threshold. Default to 0.5.
   -m, --model=model               Directory or a config file hosting Orchestrator model files.
-  -o, --out=out                   Directory where analysis files will be placed.
+  -o, --out=out                   Directory where analysis and output files will be placed.
   -p, --multi_label=threshold     Plural/multi-label prediction threshold, default to 1,
                                   i.e., only max-score intents are predicted
   -t, --test=test                 Path to a test file.
   -u, --unknown=threshold         Unknow label threshold, default to 0.3.
-```
 
 DESCRIPTION
   The 'test' command can test an Orchestrator model and example set on an input utterance/intent file.
 
 EXAMPLE
-
+```
 _See code: [src\commands\orchestrator\test.ts](https://github.com/microsoft/botframework-cli/blob/v1.0.0/src\commands\orchestrator\test.ts)_
 <!-- commandsstop -->

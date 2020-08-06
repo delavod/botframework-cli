@@ -16,9 +16,9 @@ export default class OrchestratorPredict extends Command {
     $ bf orchestrator:predict --in ./path/to/file/ --out ./path/to/output/`]
 
   static flags: flags.Input<any> = {
-    in: flags.string({char: 'l', description: 'Path to a previously created Orchestrator .blu file. Optional.'}),
-    out: flags.string({char: 'o', description: 'Directory where analysis files will be placed.'}),
-    model: flags.string({char: 'm', description: 'Directory or a config file hosting Orchestrator model files.'}),
+    in: flags.string({char: 'l', description: 'Optional path to a previously created Orchestrator .blu file.'}),
+    out: flags.string({char: 'o', description: 'Directory where analysis and output files will be placed.'}),
+    model: flags.string({char: 'm', description: 'Directory or hosting Orchestrator config and model files.'}),
     ambiguous: flags.string({char: 'a', description: `Ambiguous threshold, default to ${Utility.DefaultAmbiguousClosenessParameter}`}),
     low_confidence: flags.string({char: 'l', description: `Low confidence threshold, default to ${Utility.DefaultLowConfidenceScoreThresholdParameter}`}),
     multi_label: flags.string({char: 'p', description: `Plural/multi-label prediction threshold, default to ${Utility.DefaultMultiLabelPredictionThresholdParameter}`}),
@@ -73,8 +73,8 @@ export default class OrchestratorPredict extends Command {
     Utility.debuggingLog(`OrchestratorPredict.run(): nlrPath=${nlrPath}`);
     Utility.debuggingLog(`OrchestratorPredict.run(): ambiguousClosenessParameter=${ambiguousClosenessParameter}`);
     Utility.debuggingLog(`OrchestratorPredict.run(): lowConfidenceScoreThresholdParameter=${lowConfidenceScoreThresholdParameter}`);
-    Utility.debuggingLog(`OrchestratorEvaluate.run(): multiLabelPredictionThresholdParameter=${multiLabelPredictionThresholdParameter}`);
-    Utility.debuggingLog(`OrchestratorEvaluate.run(): unknownLabelPredictionThresholdParameter=${unknownLabelPredictionThresholdParameter}`);
+    Utility.debuggingLog(`OrchestratorPredict.run(): multiLabelPredictionThresholdParameter=${multiLabelPredictionThresholdParameter}`);
+    Utility.debuggingLog(`OrchestratorPredict.run(): unknownLabelPredictionThresholdParameter=${unknownLabelPredictionThresholdParameter}`);
 
     try {
       await Orchestrator.predictAsync(

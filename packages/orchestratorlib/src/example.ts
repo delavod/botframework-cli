@@ -19,7 +19,7 @@ export class Example {
     'text': string;
     'labels': {
       'name': string;
-      'label_type': number;
+      'labeltype': number;
       'span': {
         'offset': number;
         'length': number; }; }[]; } {

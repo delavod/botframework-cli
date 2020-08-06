@@ -5,8 +5,12 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
+import {Label} from './label';
 import {Utility} from './utility';
 import {PrebuiltToRecognizerMap} from './resources/recognizerMap';
+import { LabelType } from './labeltype';
+import { Span } from './span';
+import { start } from 'repl';
 
 const ReadText: any = require('read-text-file');
 const LuisBuilder: any = require('@microsoft/bf-lu').V2.LuisBuilder;
@@ -401,7 +405,6 @@ export class OrchestratorHelper {
       luisObject.utterances.forEach((e: any) => {
         const label: string = e.intent.trim();
         const utterance: string = e.text.trim();
-
         OrchestratorHelper.addNewLabelUtterance(
           utterance,
           label,
@@ -409,6 +412,7 @@ export class OrchestratorHelper {
           utteranceLabelsMap,
           utteranceLabelDuplicateMap
         );
+        const entities: any = e.entities;
       });
     }
   }
@@ -459,9 +463,42 @@ export class OrchestratorHelper {
     }
   }
 
+  // eslint-disable-next-line max-params
+  static addNewEntityLabelUtterance(
+    utterance: string,
+    entities: any,
+    utteranceEntityLabelsMap: { [id: string]: Label[] },
+    utteranceEntityLabelDuplicateMap: Map<string, Set<Label>>) {
+    const existingEntityLabels: Label[] = utteranceEntityLabelsMap[utterance];
+    for (const entityEntry of entities) {
+      const entity: string = entityEntry.entity;
+      const startPos: number = Number(entityEntry.startPos);
+      const endPos: number = Number(entityEntry.endPos);
+      // const entityMention: string = entityEntry.text;
+      const entityLabel: Label = new Label(LabelType.Entity, entity, new Span(startPos, endPos - startPos));
+      if (existingEntityLabels) {
+        if (!OrchestratorHelper.addUniqueEntityLabel(entityLabel, existingEntityLabels)) {
+          Utility.insertStringLabelPairToStringIdLabelSetNativeMap(utterance, entityLabel, utteranceEntityLabelDuplicateMap);
+        }
+      } else {
+        utteranceEntityLabelsMap[utterance] = [entityLabel];
+      }
+    }
+  }
+
   static addUniqueLabel(newLabel: string, labels: string[]): boolean {
     for (const label of labels) {
       if (label === newLabel) {
+        return false;
+      }
+    }
+    labels.push(newLabel);
+    return true;
+  }
+
+  static addUniqueEntityLabel(newLabel: Label, labels: Label[]): boolean {
+    for (const label of labels) {
+      if (label.equals(newLabel)) {
         return false;
       }
     }

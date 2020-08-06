@@ -8,7 +8,7 @@ import assert = require('assert');
 import {} from 'mocha';
 
 import {Label} from '../src/label';
-import {LabelType} from '../src/label-type';
+import {LabelType} from '../src/labeltype';
 import {Span} from '../src/span';
 import {Utility} from '../src/utility';
 import {UnitTestHelper} from './utility.test';
@@ -21,14 +21,14 @@ describe('Test Suite - label', () => {
     Utility.debuggingLog(`label=${Utility.jsonStringify(label)}`);
     const labelObject: {
       name: string;
-      label_type: number;
+      labeltype: number;
       span: {
           offset: number;
           length: number;
       };
     } = label.toObject();
     assert.ok(label.name === 'label');
-    assert.ok(label.label_type === LabelType.Intent);
+    assert.ok(label.labeltype === LabelType.Intent);
     assert.ok(labelObject.span.offset === 0);
     assert.ok(labelObject.span.length === 0);
   });
