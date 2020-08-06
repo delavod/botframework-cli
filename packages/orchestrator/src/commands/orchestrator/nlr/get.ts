@@ -30,7 +30,7 @@ export default class OrchestratorNlrGet extends Command {
       await Orchestrator.nlrGetAsync(
         OrchestratorSettings.ModelPath,
         versionId,
-        (message) => {
+        (message: any) => {
           if (flags.verbose) {
             this.log(message);
           }

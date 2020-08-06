@@ -4,19 +4,30 @@
  */
 
 import {expect, test} from '@oclif/test';
+import {Orchestrator} from '@microsoft/bf-orchestrator';
+const sinon: any = require('sinon');
 
-describe('orchestrator:nlr', () => {
-  test
-  .stdout()
-  .command(['orchestrator:nlr'])
-  .it('runs hello', (ctx: any) => {
-    expect(ctx.stdout).to.contain('hello world');
+describe('orchestrator:nlr:get', () => {
+  beforeEach(() => {
+    sinon.stub(Orchestrator, 'nlrGetAsync');
+    sinon.stub(Orchestrator, 'nlrListAsync');
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   test
   .stdout()
-  .command(['orchestrator:nlr', '--name', 'jeff'])
-  .it('runs hello --name jeff', (ctx: any) => {
-    expect(ctx.stdout).to.contain('hello jeff');
+  .command(['orchestrator:nlr:get', '--help'])
+  .it('should print the help contents when --help is passed as an argument', (ctx: any) => {
+    expect(ctx.stdout).to.contain('Gets Orchestrator model');
+  });
+
+  test
+  .stdout()
+  .command(['orchestrator:nlr:list', '--help'])
+  .it('should print the help contents when --help is passed as an argument', (ctx: any) => {
+    expect(ctx.stdout).to.contain('Lists all Orchestrator model versions');
   });
 });
