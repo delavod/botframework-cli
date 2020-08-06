@@ -109,7 +109,7 @@ export class OrchestratorEvaluate {
     }
     // ---- NOTE ---- integrated step to produce analysis reports.
     Utility.debuggingLog('OrchestratorEvaluate.runAsync(), ready to call Utility.resetLabelResolverSettingIgnoreSameExample("true")');
-    Utility.resetLabelResolverSettingIgnoreSameExample(labelResolver, true);
+    Utility.resetLabelResolverSettingIgnoreSameExample(true);
     Utility.debuggingLog('OrchestratorEvaluate.runAsync(), finished calling Utility.resetLabelResolverSettingIgnoreSameExample()');
     Utility.debuggingLog('OrchestratorEvaluate.runAsync(), ready to call Utility.generateEvaluationReport()');
     const evaluationOutput: {
@@ -155,7 +155,6 @@ export class OrchestratorEvaluate {
         'scoreOutputLines': string[][];
     } =
     Utility.generateEvaluationReport(
-      labelResolver,
       labels,
       utteranceLabelsMap,
       utteranceLabelDuplicateMap,

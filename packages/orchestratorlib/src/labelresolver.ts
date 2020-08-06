@@ -96,6 +96,16 @@ export class LabelResolver {
     return labelResolver.score(utterance, labelType);
   }
 
+  public static getConfigJson(labelResolver: any = null) {
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
+    return labelResolver.getConfigJson();
+  }
+
+  public static setRuntimeParams(config: string, resetAll: boolean, labelResolver: any = null) {
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
+    return labelResolver.setRuntimeParams(config, resetAll);
+  }
+
   public static addExamples(utteranceLabelsMap: {[id: string]: string[]}, labelResolver: any = null) {
     if (labelResolver === null) {
       labelResolver = LabelResolver.LabelResolver;

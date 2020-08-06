@@ -13,6 +13,7 @@ import {MultiLabelConfusionMatrixSubset} from '@microsoft/bf-dispatcher';
 import {Example} from './example';
 import {Label} from './label';
 import {LabelType} from './labeltype';
+import {LabelResolver} from './labelresolver';
 import {OrchestratorHelper} from './orchestratorhelper';
 import {Result} from './result';
 import {ScoreStructure} from './scorestructure';
@@ -106,21 +107,26 @@ export class Utility {
   }
 
   public static resetLabelResolverSettingIgnoreSameExample(
-    labelResolver: any,
-    ignoreSameExample: boolean = true): any {
+    ignoreSameExample: boolean = true,
+    resetAll: boolean = false): any {
     const ignoreSameExampleObject: {
       ignore_same_example: boolean;
     } = {
       ignore_same_example: ignoreSameExample,
     };
-    Utility.debuggingLog(`read to call labelResolver.setRuntimeParams(), ignoreSameExampleObject=${ignoreSameExampleObject}`);
-    labelResolver.setRuntimeParams(Utility.jsonStringify(ignoreSameExampleObject), false);
-    Utility.debuggingLog(`read to call Utility.getLabelResolverSettings(), labelResolver=${labelResolver}`);
-    return Utility.getLabelResolverSettings(labelResolver);
+    Utility.debuggingLog(`read to call LabelResolver.setRuntimeParams(), ignoreSameExample=${ignoreSameExample}`);
+    Utility.debuggingLog(`read to call LabelResolver.setRuntimeParams(), resetAll=${resetAll}`);
+    Utility.debuggingLog(`read to call LabelResolver.setRuntimeParams(), ignoreSameExampleObject=${ignoreSameExampleObject}`);
+    Utility.debuggingLog(`read to call LabelResolver.setRuntimeParams(), ignoreSameExampleObject.ignore_same_example=${ignoreSameExampleObject.ignore_same_example}`);
+    const ignoreSameExampleObjectJson: string = Utility.jsonStringify(ignoreSameExampleObject);
+    Utility.debuggingLog(`read to call LabelResolver.setRuntimeParams(), ignoreSameExampleObjectJson=${ignoreSameExampleObjectJson}`);
+    LabelResolver.setRuntimeParams(ignoreSameExampleObjectJson, resetAll);
+    Utility.debuggingLog(`read to call Utility.getLabelResolverSettings(), LabelResolver=${LabelResolver}`);
+    return Utility.getLabelResolverSettings();
   }
 
-  public static getLabelResolverSettings(labelResolver: any): any {
-    const labelResolverConfig: any = labelResolver.getConfigJson();
+  public static getLabelResolverSettings(): any {
+    const labelResolverConfig: any = LabelResolver.getConfigJson();
     return labelResolverConfig;
   }
 
@@ -135,14 +141,13 @@ export class Utility {
   }
 
   public static parseLabelResolverLabelEntry(
-    labelResolver: any,
     label: string,
     intentLabelArray: string[]): string {
     label = label.trim();
     if (!Utility.isEmptyString(label)) {
       if (Number.isInteger(Number(label))) {
         const labelIndex: number = Number(label);
-        const labels: string[] = labelResolver.getLabels(LabelType.Intent);
+        const labels: string[] = LabelResolver.getLabels(LabelType.Intent);
         const currentLabelArrayAndMap: {
           'stringArray': string[];
           'stringMap': {[id: string]: number};} =
@@ -320,7 +325,6 @@ export class Utility {
 
   // eslint-disable-next-line max-params
   public static generateEvaluationReport(
-    labelResolver: any,
     trainingSetLabels: string[],
     utteranceLabelsMap: { [id: string]: string[] },
     utteranceLabelDuplicateMap: Map<string, Set<string>>,
@@ -400,7 +404,6 @@ export class Utility {
     Utility.debuggingLog('Utility.generateEvaluationReport(), ready to call Utility.score()');
     const utteranceLabelsPairArray: [string, string[]][] = Object.entries(utteranceLabelsMap);
     const scoreStructureArray: ScoreStructure[] = Utility.score(
-      labelResolver,
       utteranceLabelsPairArray,
       evaluationReportLabelUtteranceStatistics.labelArrayAndMap,
       multiLabelPredictionThreshold,
@@ -444,7 +447,7 @@ export class Utility {
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
       Utility.debuggingLog(`Utility.generateEvaluationReport(), JSON.stringify(labelArrayAndMap.stringArray)=${JSON.stringify(evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringArray)}`);
       Utility.debuggingLog(`Utility.generateEvaluationReport(), JSON.stringify(labelArrayAndMap.stringMap)=${JSON.stringify(evaluationReportLabelUtteranceStatistics.labelArrayAndMap.stringMap)}`);
-      const labels: any = labelResolver.getLabels();
+      const labels: any = LabelResolver.getLabels(LabelType.Intent);
       Utility.debuggingLog(`Utility.generateEvaluationReport(), JSON.stringify(labels)=${JSON.stringify(labels)}`);
     }
     // ---- NOTE ---- return
@@ -1060,7 +1063,6 @@ export class Utility {
 
   // eslint-disable-next-line max-params
   public static score(
-    labelResolver: any,
     utteranceLabelsPairArray: [string, string[]][],
     labelArrayAndMap: {
       'stringArray': string[];
@@ -1080,7 +1082,7 @@ export class Utility {
         if (Utility.toPrintDetailedDebuggingLogToConsole) {
           Utility.debuggingLog(`Utility.score(), before calling score(), utterance=${utterance}`);
         }
-        const scoreResults: any = labelResolver.score(utterance, LabelType.Intent);
+        const scoreResults: any = LabelResolver.score(utterance, LabelType.Intent);
         if (!scoreResults) {
           continue;
         }

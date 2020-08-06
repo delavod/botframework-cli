@@ -66,7 +66,7 @@ export class OrchestratorTest {
     const testingSetLabelsOutputFilename: string = path.join(outputPath, OrchestratorTest.testingSetLabelsOutputFilename);
     // ---- NOTE ---- create a LabelResolver object.
     Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call LabelResolver.createWithSnapshotAsync()');
-    const labelResolver: any = await LabelResolver.createWithSnapshotAsync(nlrPath, trainingFile);
+    await LabelResolver.createWithSnapshotAsync(nlrPath, trainingFile);
     Utility.debuggingLog('OrchestratorTest.runAsync(), after calling LabelResolver.createWithSnapshotAsync()');
     // ---- NOTE ---- process the training set, retrieve labels
     let processedUtteranceLabelsMap: {
@@ -95,7 +95,7 @@ export class OrchestratorTest {
     }
     // ---- NOTE ---- integrated step to produce analysis reports.
     Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call Utility.resetLabelResolverSettingIgnoreSameExample("false")');
-    Utility.resetLabelResolverSettingIgnoreSameExample(labelResolver, false);
+    Utility.resetLabelResolverSettingIgnoreSameExample(false);
     Utility.debuggingLog('OrchestratorTest.runAsync(), finished calling Utility.resetLabelResolverSettingIgnoreSameExample()');
     Utility.debuggingLog('OrchestratorTest.runAsync(), ready to call Utility.generateEvaluationReport()');
     const evaluationOutput: {
@@ -141,7 +141,6 @@ export class OrchestratorTest {
       'scoreOutputLines': string[][];
     } =
     Utility.generateEvaluationReport(
-      labelResolver,
       trainingSetLabels,
       utteranceLabelsMap,
       utteranceLabelDuplicateMap,
