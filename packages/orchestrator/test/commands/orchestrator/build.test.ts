@@ -4,19 +4,22 @@
  */
 
 import {expect, test} from '@oclif/test';
+import {Orchestrator} from '@microsoft/bf-orchestrator';
+const sinon: any = require('sinon');
 
 describe('orchestrator:build', () => {
-  test
-  .stdout()
-  .command(['orchestrator:build'])
-  .it('runs hello', (ctx: any) => {
-    expect(ctx.stdout).to.contain('hello world');
+  beforeEach(() => {
+    sinon.stub(Orchestrator, 'buildAsync');
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   test
   .stdout()
-  .command(['orchestrator:build', '--name', 'jeff'])
-  .it('runs hello --name jeff', (ctx: any) => {
-    expect(ctx.stdout).to.contain('hello jeff');
+  .command(['orchestrator:build', '--help'])
+  .it('should print the help contents when --help is passed as an argument', (ctx: any) => {
+    expect(ctx.stdout).to.contain('Creates Orchestrator snapshot file and Orchestrator dialog definition file (optional) for each lu file in');
   });
 });

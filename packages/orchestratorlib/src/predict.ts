@@ -226,10 +226,10 @@ export class OrchestratorPredict {
     Utility.debuggingLog('OrchestratorPredict.buildLabelResolver(), ready to create a LabelResolver object');
     if (Utility.exists(this.trainingFile)) {
       Utility.debuggingLog('OrchestratorPredict.buildLabelResolver(), ready to call LabelResolver.createWithSnapshotAsync()');
-      this.labelResolver = await LabelResolver.createWithSnapshotAsync(this.nlrPath, this.trainingFile);
+      await LabelResolver.createWithSnapshotAsync(this.nlrPath, this.trainingFile);
     } else {
       Utility.debuggingLog('OrchestratorPredict.buildLabelResolver(), ready to call LabelResolver.createAsync()');
-      this.labelResolver = await LabelResolver.createAsync(this.nlrPath);
+      await LabelResolver.createAsync(this.nlrPath);
     }
     Utility.debuggingLog('OrchestratorPredict.buildLabelResolver(), after creating a LabelResolver object');
   }
@@ -411,7 +411,7 @@ export class OrchestratorPredict {
     console.log(`> Unknown-label threshold:       ${this.unknownLabelPredictionThreshold}`);
     const labelResolverConfig: any = Utility.getLabelResolverSettings(this.labelResolver);
     console.log(`> Orchestrator configuration:         ${labelResolverConfig}`);
-    const labels: string[] = this.labelResolver.getLabels(LabelType.Intent);
+    const labels: string[] = LabelResolver.getLabels(LabelType.Intent);
     this.currentLabelArrayAndMap = Utility.buildStringIdNumberValueDictionaryFromStringArray(labels);
     console.log(`> Current label-index map: ${Utility.jsonStringify(this.currentLabelArrayAndMap.stringMap)}`);
     return 0;
@@ -420,12 +420,12 @@ export class OrchestratorPredict {
   public commandLetS(): number {
     this.currentUtteranceLabelsMap = {};
     this.currentUtteranceLabelDuplicateMap = new Map<string, Set<string>>();
-    const examples: any = this.labelResolver.getExamples();
+    const examples: any = LabelResolver.getExamples();
     if (examples.length <= 0) {
       console.log('> There is no example');
       return -1;
     }
-    const labels: string[] = this.labelResolver.getLabels(LabelType.Intent);
+    const labels: string[] = LabelResolver.getLabels(LabelType.Intent);
     this.currentLabelArrayAndMap = Utility.buildStringIdNumberValueDictionaryFromStringArray(labels);
     Utility.examplesToUtteranceLabelMaps(
       examples,
@@ -531,7 +531,7 @@ export class OrchestratorPredict {
       console.log('> No model is loaded, cannot make a prediction.');
     }
     Utility.resetLabelResolverSettingIgnoreSameExample(this.labelResolver, false);
-    const scoreResults: any = this.labelResolver.score(this.currentUtterance, LabelType.Intent);
+    const scoreResults: any = LabelResolver.score(this.currentUtterance, LabelType.Intent);
     if (!scoreResults) {
       return -1;
     }
@@ -541,10 +541,10 @@ export class OrchestratorPredict {
 
   public commandLetV(): number {
     // ---- NOTE ---- process the training set.
-    const labels: string[] = this.labelResolver.getLabels(LabelType.Intent);
+    const labels: string[] = LabelResolver.getLabels(LabelType.Intent);
     const utteranceLabelsMap: { [id: string]: string[] } = {};
     const utteranceLabelDuplicateMap: Map<string, Set<string>> = new Map<string, Set<string>>();
-    const examples: any = this.labelResolver.getExamples();
+    const examples: any = LabelResolver.getExamples();
     if (examples.length <= 0) {
       console.log('ERROR: There is no example in the training set, please add some.');
       return -1;
@@ -812,7 +812,7 @@ export class OrchestratorPredict {
       this.currentIntentLabels);
     const exampleObejct: any = example.toObject();
     Utility.debuggingLog(`exampleObejct=${Utility.jsonStringify(exampleObejct)}`);
-    const rvAddExample: any = this.labelResolver.addExample(exampleObejct);
+    const rvAddExample: any = LabelResolver.addExample(exampleObejct);
     Utility.debuggingLog(`rv=${rvAddExample}`);
     if (!rvAddExample) {
       console.log(`ERROR: There is an error, the example was not added, example: ${Utility.jsonStringify(exampleObejct)}`);
@@ -828,7 +828,7 @@ export class OrchestratorPredict {
       this.currentIntentLabels);
     const exampleObejct: any = example.toObject();
     Utility.debuggingLog(`exampleObejct=${Utility.jsonStringify(exampleObejct)}`);
-    const rvRemoveExample: any = this.labelResolver.removeExample(exampleObejct);
+    const rvRemoveExample: any = LabelResolver.removeExample(exampleObejct);
     Utility.debuggingLog(`rv=${rvRemoveExample}`);
     if (!rvRemoveExample) {
       console.log(`ERROR: There is an error, the example was not removed, example: ${Utility.jsonStringify(exampleObejct)}`);
@@ -844,7 +844,7 @@ export class OrchestratorPredict {
       this.currentIntentLabels);
     const exampleObejctToRemove: any = exampleToRemove.toObject();
     Utility.debuggingLog(`exampleObejctToRemove=${Utility.jsonStringify(exampleObejctToRemove)}`);
-    const rvRemoveExample: any = this.labelResolver.removeExample(exampleObejctToRemove);
+    const rvRemoveExample: any = LabelResolver.removeExample(exampleObejctToRemove);
     Utility.debuggingLog(`rvRemoveExample=${rvRemoveExample}`);
     if (!rvRemoveExample) {
       console.log(`ERROR: There is an error, the example was not removed, example: ${Utility.jsonStringify(exampleObejctToRemove)}`);
@@ -855,7 +855,7 @@ export class OrchestratorPredict {
       this.newIntentLabels);
     const exampleObejctToAdd: any = exampleToAdd.toObject();
     Utility.debuggingLog(`exampleObejctToAdd=${Utility.jsonStringify(exampleObejctToAdd)}`);
-    const rvAddExample: any = this.labelResolver.addExample(exampleObejctToAdd);
+    const rvAddExample: any = LabelResolver.addExample(exampleObejctToAdd);
     Utility.debuggingLog(`rvAddExample=${rvAddExample}`);
     if (!rvAddExample) {
       console.log(`ERROR: There is an error, the example was not added, example: ${Utility.jsonStringify(exampleObejctToAdd)}`);
@@ -871,7 +871,7 @@ export class OrchestratorPredict {
       return -1;
     }
     for (const label of this.currentIntentLabels) {
-      const rvRemoveLabel: any = this.labelResolver.removeLabel(label);
+      const rvRemoveLabel: any = LabelResolver.removeLabel(label);
       if (!rvRemoveLabel) {
         console.log(`ERROR: Failed to remove label: '${label}'`);
         return -1;
@@ -882,7 +882,7 @@ export class OrchestratorPredict {
   }
 
   public commandLetN(): number {
-    const snapshot: any = this.labelResolver.createSnapshot();
+    const snapshot: any = LabelResolver.createSnapshot();
     OrchestratorHelper.writeToFile(this.getPredictingSetSnapshotFilename(), snapshot);
     Utility.debuggingLog(`Snapshot written to ${this.getPredictingSetSnapshotFilename()}`);
     console.log(`> A new snapshot has been saved to '${this.getPredictingSetSnapshotFilename()}'`);

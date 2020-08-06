@@ -4,26 +4,22 @@
  */
 
 import {expect, test} from '@oclif/test';
+import {Orchestrator} from '@microsoft/bf-orchestrator';
+const sinon: any = require('sinon');
 
 describe('orchestrator:evaluate', () => {
-  test
-  .stdout()
-  .command(['orchestrator:evaluate'])
-  .it('Test.0000 orchestrator:evaluate', (_ctx: any) => {
-    // expect(ctx.stdout).to.contain('evaluate');
+  beforeEach(() => {
+    sinon.stub(Orchestrator, 'evaluateAsync');
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   test
   .stdout()
   .command(['orchestrator:evaluate', '--help'])
-  .it('Test.0001 orchestrator:evaluate --help', (ctx: any) => {
-    expect(ctx.stdout).to.contain('help');
-  });
-
-  test
-  .stdout()
-  .command(['orchestrator:evaluate', '--debug', '--in=resources/data/Columnar/Email.blu', '--out=resources/data/Columnar/OrchestratorModelForEvaluateCommand_Email'])
-  .it('Test.0002 orchestrator:evaluate Email.blu', (ctx: any) => {
-    expect(ctx.stdout).to.contain('Email');
+  .it('should print the help contents when --help is passed as an argument', (ctx: any) => {
+    expect(ctx.stdout).to.contain('Create an Orchestrator leave-one-out cross validation (LOOCV) evaluation report on a previously generated .blu file');
   });
 });

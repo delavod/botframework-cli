@@ -4,26 +4,22 @@
  */
 
 import {expect, test} from '@oclif/test';
+import {Orchestrator} from '@microsoft/bf-orchestrator';
+const sinon: any = require('sinon');
 
 describe('orchestrator:test', () => {
-  test
-  .stdout()
-  .command(['orchestrator:test'])
-  .it('Test.0000 orchestrator:test', (_ctx: any) => {
-    // expect(ctx.stdout).to.contain('test');
+  beforeEach(() => {
+    sinon.stub(Orchestrator, 'testAsync');
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   test
   .stdout()
   .command(['orchestrator:test', '--help'])
-  .it('Test.0001 orchestrator:test --help', (ctx: any) => {
-    expect(ctx.stdout).to.contain('help');
+  .it('should print the help contents when --help is passed as an argument', (ctx: any) => {
+    expect(ctx.stdout).to.contain('Test utterance/label samples from an input file and create an evaluation report');
   });
-
-  // ---- NOTE-NEED-NLR ---- test
-  // ---- NOTE-NEED-NLR ---- .stdout()
-  // ---- NOTE-NEED-NLR ---- .command(['orchestrator:test', '--debug', '--in=resources/data/Columnar/Email.blu', '--test=resources/data/Columnar/EmailTest.txt', '--out=resources/data/Columnar/OrchestratorModelForTestCommand_Email'])
-  // ---- NOTE-NEED-NLR ---- .it('Test.0002 orchestrator:test EmailTest.txt', (ctx: any) => {
-  // ---- NOTE-NEED-NLR ----   expect(ctx.stdout).to.contain('Email');
-  // ---- NOTE-NEED-NLR ---- });
 });

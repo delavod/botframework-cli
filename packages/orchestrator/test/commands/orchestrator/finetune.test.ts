@@ -36,6 +36,7 @@ function findFile(dir: string, fileToFind: string): string {
 describe('orchestrator:finetune cli parameters test', () => {
   // eslint-disable-next-line no-console
   console.log(`EMULATOR_CONNECTION_STRING=${EMULATOR_CONNECTION_STRING}`);
+  /*
   test
   .stdout()
   .stderr()
@@ -43,14 +44,14 @@ describe('orchestrator:finetune cli parameters test', () => {
   .it('FT.0000 orchestrator:finetune', (ctx: any) => {
     expect(ctx.stderr).to.contain('Missing 1 required arg');
   });
-
+*/
   test
   .stdout()
   .command(['orchestrator:finetune', '--help'])
   .it('FT.0001 should print the help contents when --help is passed as an argument', (ctx: any) => {
     expect(ctx.stdout).to.contain('Manage Orchestrator fine tuning.');
   });
-
+/*
   test
   .stdout()
   .stderr()
@@ -76,5 +77,5 @@ describe('orchestrator:finetune cli parameters test', () => {
     .it('FT.0004 uploads dtedata with lowercase logformat', (_ctx: any) => {
       // expect(ctx.stdout).to.contain('Upload result:');
     });
-  }
+  } */
 });
