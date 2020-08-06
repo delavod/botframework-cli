@@ -60,6 +60,13 @@ export class LabelResolver {
     return LabelResolver.LabelResolver;
   }
 
+  public static createSnapshot(labelResolver: any = null) {
+    if (labelResolver === null) {
+      labelResolver = LabelResolver.LabelResolver;
+    }
+    return labelResolver.createSnapshot();
+  }
+
   public static addExamples(utteranceLabelsMap: {[id: string]: string[]}, labelResolver: any = null) {
     if (labelResolver === null) {
       labelResolver = LabelResolver.LabelResolver;

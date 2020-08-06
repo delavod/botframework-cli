@@ -24,10 +24,10 @@ export class OrchestratorCreate {
 
     nlrPath = path.resolve(nlrPath);
 
-    const labelResolver: any = await LabelResolver.createAsync(nlrPath);
+    await LabelResolver.createAsync(nlrPath);
     LabelResolver.addExamples((await OrchestratorHelper.getUtteranceLabelsMap(inputPath, hierarchical)).utteranceLabelsMap);
 
-    const snapshot: any = labelResolver.createSnapshot();
+    const snapshot: any = LabelResolver.createSnapshot();
 
     const outPath: string = OrchestratorCreate.getOutputPath(outputPath, inputPath);
     OrchestratorHelper.writeToFile(outPath, snapshot);
