@@ -1846,7 +1846,7 @@ export class Utility {
     if (!stringKeyStringSetMap) {
       stringKeyStringSetMap = new Map<string, Set<string>>();
     }
-    if (key in stringKeyStringSetMap) {
+    if (stringKeyStringSetMap.has(key)) {
       let stringSet: Set<string> | undefined = stringKeyStringSetMap.get(key);
       if (!stringSet) {
         stringSet = new Set<string>();
@@ -1864,23 +1864,43 @@ export class Utility {
   public static insertStringLabelPairToStringIdLabelSetNativeMap(
     key: string,
     value: Label,
-    stringKeyLabelSetMap: Map<string, Set<Label>>): Map<string, Set<Label>> {
+    stringKeyLabelSetMap: Map<string, Label[]>): Map<string, Label[]> {
     if (!stringKeyLabelSetMap) {
-      stringKeyLabelSetMap = new Map<string, Set<Label>>();
+      stringKeyLabelSetMap = new Map<string, Label[]>();
     }
-    if (key in stringKeyLabelSetMap) {
-      let labelSet: Set<Label> | undefined = stringKeyLabelSetMap.get(key);
+    if (stringKeyLabelSetMap.has(key)) {
+      let labelSet: Label[] | undefined = stringKeyLabelSetMap.get(key);
       if (!labelSet) {
-        labelSet = new Set<Label>();
+        labelSet = [];
         stringKeyLabelSetMap.set(key, labelSet);
       }
-      labelSet.add(value);
+      Utility.addUniqueEntityLabel(value, labelSet);
     } else {
-      const labelSet: Set<Label> = new Set<Label>();
+      const labelSet: Label[] = [];
       stringKeyLabelSetMap.set(key, labelSet);
-      labelSet.add(value);
+      labelSet.push(value);
     }
     return stringKeyLabelSetMap;
+  }
+
+  public static addUniqueLabel(newLabel: string, labels: string[]): boolean {
+    for (const label of labels) {
+      if (label === newLabel) {
+        return false;
+      }
+    }
+    labels.push(newLabel);
+    return true;
+  }
+
+  public static addUniqueEntityLabel(newLabel: Label, labels: Label[]): boolean {
+    for (const label of labels) {
+      if (label.equals(newLabel)) {
+        return false;
+      }
+    }
+    labels.push(newLabel);
+    return true;
   }
 
   public static countMapValues(inputStringToStringArrayMap: { [id: string]: string[] }): number {

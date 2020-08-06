@@ -5,12 +5,11 @@
 
 import * as path from 'path';
 import * as fs from 'fs-extra';
+import {LabelType} from './labeltype';
 import {Label} from './label';
+import {Span} from './span';
 import {Utility} from './utility';
 import {PrebuiltToRecognizerMap} from './resources/recognizerMap';
-import { LabelType } from './labeltype';
-import { Span } from './span';
-import { start } from 'repl';
 
 const ReadText: any = require('read-text-file');
 const LuisBuilder: any = require('@microsoft/bf-lu').V2.LuisBuilder;
@@ -412,7 +411,6 @@ export class OrchestratorHelper {
           utteranceLabelsMap,
           utteranceLabelDuplicateMap
         );
-        const entities: any = e.entities;
       });
     }
   }
@@ -468,8 +466,8 @@ export class OrchestratorHelper {
     utterance: string,
     entities: any,
     utteranceEntityLabelsMap: { [id: string]: Label[] },
-    utteranceEntityLabelDuplicateMap: Map<string, Set<Label>>) {
-    const existingEntityLabels: Label[] = utteranceEntityLabelsMap[utterance];
+    utteranceEntityLabelDuplicateMap: Map<string, Label[]>) {
+    let existingEntityLabels: Label[] = utteranceEntityLabelsMap[utterance];
     for (const entityEntry of entities) {
       const entity: string = entityEntry.entity;
       const startPos: number = Number(entityEntry.startPos);
@@ -481,7 +479,8 @@ export class OrchestratorHelper {
           Utility.insertStringLabelPairToStringIdLabelSetNativeMap(utterance, entityLabel, utteranceEntityLabelDuplicateMap);
         }
       } else {
-        utteranceEntityLabelsMap[utterance] = [entityLabel];
+        existingEntityLabels = [entityLabel];
+        utteranceEntityLabelsMap[utterance] = existingEntityLabels;
       }
     }
   }

@@ -11,6 +11,10 @@ export class Label {
     return new Label(LabelType.Intent, label, new Span(spanOffset, spanLength));
   }
 
+  public static newEntityLabel(label: string, spanOffset: number = 0, spanLength: number = 0): Label {
+    return new Label(LabelType.Entity, label, new Span(spanOffset, spanLength));
+  }
+
   constructor(labeltype: LabelType, name: string, span: Span) {
     this.labeltype = labeltype;
     this.name = name;
@@ -28,6 +32,38 @@ export class Label {
       labeltype: this.labeltype,
       span: this.span.toObject(),
     };
+  }
+
+  public toEntityObject(): {
+    'entity': string;
+    'startPos': number;
+    'endPos': number; } {
+    return {
+      entity: this.name,
+      startPos: this.getStartPos(),
+      endPos: this.getEndPos(),
+    };
+  }
+
+  public toEntityObjectWithText(utterance: string): {
+    'entity': string;
+    'startPos': number;
+    'endPos': number;
+    'text': string; } {
+    return {
+      entity: this.name,
+      startPos: this.getStartPos(),
+      endPos: this.getEndPos(),
+      text: utterance.substring(this.getStartPos(), this.getEndPos()),
+    };
+  }
+
+  public getStartPos(): number {
+    return this.span.offset;
+  }
+
+  public getEndPos(): number {
+    return this.span.offset + this.span.length;
   }
 
   public equals(other: Label): boolean {
