@@ -6,6 +6,7 @@
 import * as path from 'path';
 import {Utility} from './utility';
 import {OrchestratorHelper} from './orchestratorhelper';
+import {LabelType} from './labeltype';
 
 const oc: any = require('orchestrator-core');
 
@@ -61,10 +62,38 @@ export class LabelResolver {
   }
 
   public static createSnapshot(labelResolver: any = null) {
-    if (labelResolver === null) {
-      labelResolver = LabelResolver.LabelResolver;
-    }
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
     return labelResolver.createSnapshot();
+  }
+
+  public static addExample(example: any /* {label: label, text: utterance} */, labelResolver: any = null) {
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
+    return labelResolver.addExample();
+  }
+
+  public static removeExample(example: any /* {label: label, text: utterance} */, labelResolver: any = null) {
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
+    return labelResolver.removeExample(example);
+  }
+
+  public static removeLabel(label: string, labelResolver: any = null) {
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
+    return labelResolver.removeLabel(label);
+  }
+
+  public static getExamples(labelResolver: any = null) {
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
+    return labelResolver.getExamples();
+  }
+
+  public static getLabels(labelType: LabelType, labelResolver: any = null) {
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
+    return labelResolver.getLabels(labelType);
+  }
+
+  public static score(utterance: string, labelType: LabelType, labelResolver: any = null) {
+    labelResolver = LabelResolver.ensureLabelResolver(labelResolver);
+    return labelResolver.score(utterance, labelType);
   }
 
   public static addExamples(utteranceLabelsMap: {[id: string]: string[]}, labelResolver: any = null) {
@@ -87,5 +116,15 @@ export class LabelResolver {
         }
       }
     }
+  }
+
+  private static ensureLabelResolver(labelResolver: any) {
+    if (labelResolver === null) {
+      labelResolver = LabelResolver.LabelResolver;
+    }
+    if (labelResolver === null) {
+      throw new Error('LabelResolver was not initialized');
+    }
+    return labelResolver;
   }
 }
