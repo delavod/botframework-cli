@@ -23,6 +23,8 @@ export class OrchestratorCreate {
     }
 
     nlrPath = path.resolve(nlrPath);
+    inputPath = path.resolve(inputPath);
+    outputPath = path.resolve(outputPath);
 
     await LabelResolver.createAsync(nlrPath);
     LabelResolver.addExamples((await OrchestratorHelper.getUtteranceLabelsMap(inputPath, hierarchical)).utteranceLabelsMap);
@@ -36,7 +38,9 @@ export class OrchestratorCreate {
 
   private static getOutputPath(out: string, base: string): string {
     let retValue: string = out;
-    if (!out.endsWith('.blu')) {
+    if (OrchestratorHelper.isDirectory(out)) {
+      retValue = path.join(out, 'orchestrator.blu');
+    } else if (!out.endsWith('.blu')) {
       const srcBaseFileName: string = path.basename(base);
       const dstBaseFileName: string = srcBaseFileName.substring(0, srcBaseFileName.lastIndexOf('.'));
       retValue = path.join(out, `${dstBaseFileName}.blu`);

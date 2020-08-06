@@ -95,6 +95,10 @@ export class OrchestratorHelper {
     return tsvContent;
   }
 
+  public static getSnapshotFromFile(file: string) {
+    return new TextEncoder().encode(OrchestratorHelper.readBluSnapshotFile(file));
+  }
+
   public static async getUtteranceLabelsMap(
     filePath: string,
     hierarchical: boolean = false): Promise<{

@@ -35,7 +35,7 @@ export class OrchestratorAdd {
 
     const ext: string = OrchestratorHelper.isDirectory(inputPath) ? '' : path.extname(inputPath);
     if (ext === '.blu') {
-      labelResolver.addSnapshot(new TextEncoder().encode(OrchestratorHelper.readBluSnapshotFile(inputPath)), labelPrefix);
+      labelResolver.addSnapshot(OrchestratorHelper.getSnapshotFromFile(inputPath), labelPrefix);
     } else {
       LabelResolver.addExamples((await OrchestratorHelper.getUtteranceLabelsMap(inputPath)).utteranceLabelsMap);
     }
