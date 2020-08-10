@@ -18,7 +18,7 @@ import {Example} from './example';
 import {LabelType} from './labeltype';
 // import {OrchestratorHelper} from './orchestratorhelper';
 // import {Result} from './result';
-import {ScoreStructure} from './scorestructure';
+import {PredictionScoreStructure} from './predictionscorestructure';
 // import {Span} from './span';
 
 import {Utility} from './utility';
@@ -142,7 +142,7 @@ export class OrchestratorPredict {
         'scoringConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
         'confusionMatrixAverageMetricsHtml': string;}; };
-    'scoreStructureArray': ScoreStructure[];
+    'predictionScoreStructureArray': PredictionScoreStructure[];
     'scoreOutputLines': string[][];
   } = Utility.generateEmptyEvaluationReport();
 

@@ -438,6 +438,37 @@ export class OrchestratorHelper {
     });
   }
 
+  // eslint-disable-next-line max-params
+  static getJsonIntentsEntitiesUtterances(
+    jsonObjectArray: any,
+    utteranceLabelsMap: { [id: string]: string[] },
+    utteranceLabelDuplicateMap: Map<string, Set<string>>,
+    utteranceEntityLabelsMap: { [id: string]: Label[] },
+    utteranceEntityLabelDuplicateMap: Map<string, Label[]>): void {
+    // eslint-disable-next-line no-prototype-builtins
+    jsonObjectArray.forEach((jsonObject: any) => {
+      const utterance: string = jsonObject.text.trim();
+      const labels: string[] = jsonObject.intents;
+      const entities: any[] = jsonObject.entities;
+      labels.forEach((label: string) => {
+        OrchestratorHelper.addNewLabelUtterance(
+          utterance,
+          label,
+          '',
+          utteranceLabelsMap,
+          utteranceLabelDuplicateMap);
+      });
+      entities.forEach((entityEntry: any) => {
+        OrchestratorHelper.addNewEntityLabelUtterance(
+          utterance,
+          entityEntry,
+          utteranceEntityLabelsMap,
+          utteranceEntityLabelDuplicateMap);
+      });
+    });
+    Utility.processUnknowLabelsInUtteranceLabelsMap({utteranceLabelsMap, utteranceLabelDuplicateMap});
+  }
+
   static getLabelFromFileName(fileName: string, ext: string, hierarchical: boolean) {
     return hierarchical ? fileName.substr(0, fileName.length - ext.length) : '';
   }
@@ -448,7 +479,7 @@ export class OrchestratorHelper {
     label: string,
     hierarchicalLabel: string,
     utteranceLabelsMap: { [id: string]: string[] },
-    utteranceLabelDuplicateMap: Map<string, Set<string>>) {
+    utteranceLabelDuplicateMap: Map<string, Set<string>>): void {
     const existingLabels: string[] = utteranceLabelsMap[utterance];
     if (existingLabels) {
       if (hierarchicalLabel && hierarchicalLabel.length > 0) {
@@ -468,24 +499,22 @@ export class OrchestratorHelper {
   // eslint-disable-next-line max-params
   static addNewEntityLabelUtterance(
     utterance: string,
-    entities: any,
+    entityEntry: any,
     utteranceEntityLabelsMap: { [id: string]: Label[] },
-    utteranceEntityLabelDuplicateMap: Map<string, Label[]>) {
+    utteranceEntityLabelDuplicateMap: Map<string, Label[]>): void {
     let existingEntityLabels: Label[] = utteranceEntityLabelsMap[utterance];
-    for (const entityEntry of entities) {
-      const entity: string = entityEntry.entity;
-      const startPos: number = Number(entityEntry.startPos);
-      const endPos: number = Number(entityEntry.endPos);
-      // const entityMention: string = entityEntry.text;
-      const entityLabel: Label = new Label(LabelType.Entity, entity, new Span(startPos, endPos - startPos));
-      if (existingEntityLabels) {
-        if (!OrchestratorHelper.addUniqueEntityLabel(entityLabel, existingEntityLabels)) {
-          Utility.insertStringLabelPairToStringIdLabelSetNativeMap(utterance, entityLabel, utteranceEntityLabelDuplicateMap);
-        }
-      } else {
-        existingEntityLabels = [entityLabel];
-        utteranceEntityLabelsMap[utterance] = existingEntityLabels;
+    const entity: string = entityEntry.entity;
+    const startPos: number = Number(entityEntry.startPos);
+    const endPos: number = Number(entityEntry.endPos);
+    // const entityMention: string = entityEntry.text;
+    const entityLabel: Label = new Label(LabelType.Entity, entity, new Span(startPos, endPos - startPos));
+    if (existingEntityLabels) {
+      if (!OrchestratorHelper.addUniqueEntityLabel(entityLabel, existingEntityLabels)) {
+        Utility.insertStringLabelPairToStringIdLabelSetNativeMap(utterance, entityLabel, utteranceEntityLabelDuplicateMap);
       }
+    } else {
+      existingEntityLabels = [entityLabel];
+      utteranceEntityLabelsMap[utterance] = existingEntityLabels;
     }
   }
 

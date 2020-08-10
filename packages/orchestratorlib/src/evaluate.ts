@@ -9,7 +9,7 @@ import {MultiLabelConfusionMatrix} from '@microsoft/bf-dispatcher';
 import {MultiLabelConfusionMatrixSubset} from '@microsoft/bf-dispatcher';
 
 import {LabelType} from './labeltype';
-import {ScoreStructure}  from './scorestructure';
+import {PredictionScoreStructure}  from './predictionscorestructure';
 
 import {LabelResolver} from './labelresolver';
 
@@ -34,7 +34,7 @@ export class OrchestratorEvaluate {
       Utility.debuggingThrow(`Please provide path to an input .blu file, CWD=${process.cwd()}, from OrchestratorEvaluate.runAsync()`);
     }
     if (Utility.isEmptyString(outputPath)) {
-      Utility.debuggingThrow('Please provide an output directory');
+      Utility.debuggingThrow(`Please provide an output directory, CWD=${process.cwd()}, called from OrchestratorEvaluate.runAsync()`);
     }
     if (nlrPath) {
       nlrPath = path.resolve(nlrPath);
@@ -151,7 +151,7 @@ export class OrchestratorEvaluate {
           'scoringConfusionMatrixOutputLines': string[][];
           'confusionMatrixMetricsHtml': string;
           'confusionMatrixAverageMetricsHtml': string;}; };
-        'scoreStructureArray': ScoreStructure[];
+        'predictionScoreStructureArray': PredictionScoreStructure[];
         'scoreOutputLines': string[][];
     } =
     Utility.generateEvaluationReport(
