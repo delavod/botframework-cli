@@ -9,7 +9,7 @@ import {LabelType} from './labeltype';
 import {Label} from './label';
 import {Span} from './span';
 import {Utility} from './utility';
-import {PrebuiltToRecognizerMap} from './resources/recognizerMap';
+import {PrebuiltToRecognizerMap} from './resources/recognizer-map';
 
 const ReadText: any = require('read-text-file');
 const LuisBuilder: any = require('@microsoft/bf-lu').V2.LuisBuilder;
