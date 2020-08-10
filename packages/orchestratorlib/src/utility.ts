@@ -528,9 +528,9 @@ export class Utility {
     } = confusionMatrix.getMicroAverageMetrics();
     const predictingConfusionMatrixOutputLineMicroAverage: any[] = [
       'Micro-Average',
-      Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
-      Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
-      Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
+      'N/A', // ---- Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
+      'N/A', // ---- Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
+      'N/A', // ---- Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
       Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
       microAverageMetrics.truePositives,
       'N/A', // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
@@ -812,7 +812,7 @@ export class Utility {
       'confusionMatrixAnalysis': {
         'confusionMatrix': MultiLabelConfusionMatrix;
         'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
-        'scoringConfusionMatrixOutputLines': string[][];
+        'predictingConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
         'confusionMatrixAverageMetricsHtml': string;}; };
     'predictionScoreStructureArray': PredictionScoreStructure[];
@@ -854,7 +854,7 @@ export class Utility {
         'confusionMatrixAnalysis': {
           'confusionMatrix': MultiLabelConfusionMatrix;
           'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
-          'scoringConfusionMatrixOutputLines': string[][];
+          'predictingConfusionMatrixOutputLines': string[][];
           'confusionMatrixMetricsHtml': string;
           'confusionMatrixAverageMetricsHtml': string;}; };
       'predictionScoreStructureArray': PredictionScoreStructure[];
@@ -895,7 +895,7 @@ export class Utility {
         confusionMatrixAnalysis: {
           confusionMatrix: new MultiLabelConfusionMatrix([], {}),
           multiLabelConfusionMatrixSubset: new MultiLabelConfusionMatrixSubset([], {}),
-          scoringConfusionMatrixOutputLines: [],
+          predictingConfusionMatrixOutputLines: [],
           confusionMatrixMetricsHtml: '',
           confusionMatrixAverageMetricsHtml: ''}},
       predictionScoreStructureArray: [],
@@ -976,7 +976,7 @@ export class Utility {
         'confusionMatrixAnalysis': {
           'confusionMatrix': MultiLabelConfusionMatrix;
           'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
-          'scoringConfusionMatrixOutputLines': string[][];
+          'predictingConfusionMatrixOutputLines': string[][];
           'confusionMatrixMetricsHtml': string;
           'confusionMatrixAverageMetricsHtml': string;}; };
       'predictionScoreStructureArray': PredictionScoreStructure[];
@@ -1041,7 +1041,7 @@ export class Utility {
       'confusionMatrixAnalysis': {
         'confusionMatrix': MultiLabelConfusionMatrix;
         'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
-        'scoringConfusionMatrixOutputLines': string[][];
+        'predictingConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
         'confusionMatrixAverageMetricsHtml': string;};
     } = Utility.generateEvaluationReportAnalyses(
@@ -1195,7 +1195,7 @@ export class Utility {
       'confusionMatrixAnalysis': {
         'confusionMatrix': MultiLabelConfusionMatrix;
         'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
-        'scoringConfusionMatrixOutputLines': string[][];
+        'predictingConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
         'confusionMatrixAverageMetricsHtml': string;};
     } {
@@ -1235,7 +1235,7 @@ export class Utility {
     const confusionMatrixAnalysis: {
       'confusionMatrix': MultiLabelConfusionMatrix;
       'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
-      'scoringConfusionMatrixOutputLines': string[][];
+      'predictingConfusionMatrixOutputLines': string[][];
       'confusionMatrixMetricsHtml': string;
       'confusionMatrixAverageMetricsHtml': string;
     } = Utility.generateConfusionMatrixMetricsAndHtmlTable(
@@ -1282,12 +1282,17 @@ export class Utility {
       'stringMap': {[id: string]: number};}): {
       'confusionMatrix': MultiLabelConfusionMatrix;
       'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
-      'scoringConfusionMatrixOutputLines': string[][];
+      'predictingConfusionMatrixOutputLines': string[][];
       'confusionMatrixMetricsHtml': string;
       'confusionMatrixAverageMetricsHtml': string;
     } {
     // -----------------------------------------------------------------------
-    const scoringConfusionMatrixOutputLines: string[][] = [];
+    return Utility.generateAssessmentConfusionMatrixMetricsAndHtmlTable(
+      predictionScoreStructureArray,
+      labelArrayAndMap);
+    // -----------------------------------------------------------------------
+    /*
+    const predictingConfusionMatrixOutputLines: string[][] = [];
     const confusionMatrix: MultiLabelConfusionMatrix = new MultiLabelConfusionMatrix(
       labelArrayAndMap.stringArray,
       labelArrayAndMap.stringMap);
@@ -1314,7 +1319,7 @@ export class Utility {
       const falseNegatives: number = binaryConfusionMatrices[i].getFalseNegatives();
       const support: number = binaryConfusionMatrices[i].getSupport();
       const total: number = binaryConfusionMatrices[i].getTotal();
-      const scoringConfusionMatrixOutputLine: any[] = [
+      const predictingConfusionMatrixOutputLine: any[] = [
         label,
         precision,
         recall,
@@ -1327,7 +1332,7 @@ export class Utility {
         support,
         total,
       ];
-      scoringConfusionMatrixOutputLines.push(scoringConfusionMatrixOutputLine);
+      predictingConfusionMatrixOutputLines.push(predictingConfusionMatrixOutputLine);
       Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), binaryConfusionMatrices[${i}].getTotal()         =${binaryConfusionMatrices[i].getTotal()}`);
       Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), binaryConfusionMatrices[${i}].getTruePositives() =${binaryConfusionMatrices[i].getTruePositives()}`);
       Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), binaryConfusionMatrices[${i}].getFalsePositives()=${binaryConfusionMatrices[i].getFalsePositives()}`);
@@ -1336,10 +1341,10 @@ export class Utility {
     }
     const confusionMatrixMetricsHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
       'Confusion matrix metrics',
-      scoringConfusionMatrixOutputLines,
+      predictingConfusionMatrixOutputLines,
       ['Intent', 'Precision', 'Recall', 'F1', 'Accuracy', '#TruePositives', '#FalsePositives', '#TrueNegatives', '#FalseNegatives', 'Support', 'Total']);
     // -----------------------------------------------------------------------
-    const scoringConfusionMatrixAverageOutputLines: string[][] = [];
+    const predictingConfusionMatrixAverageOutputLines: string[][] = [];
     const microAverageMetrics: {
       'averagePrecisionRecallF1Accuracy': number;
       'truePositives': number;
@@ -1347,11 +1352,11 @@ export class Utility {
       'falseNegatives': number;
       'total': number;
     } = confusionMatrix.getMicroAverageMetrics();
-    const scoringConfusionMatrixOutputLineMicroAverage: any[] = [
+    const predictingConfusionMatrixOutputLineMicroAverage: any[] = [
       'Micro-Average',
-      Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
-      Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
-      Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
+      'N/A', // ---- Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
+      'N/A', // ---- Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
+      'N/A', // ---- Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
       Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
       microAverageMetrics.truePositives,
       'N/A', // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
@@ -1360,7 +1365,7 @@ export class Utility {
       'N/A',
       microAverageMetrics.total,
     ];
-    scoringConfusionMatrixAverageOutputLines.push(scoringConfusionMatrixOutputLineMicroAverage);
+    predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLineMicroAverage);
     const macroAverageMetrics: {
       'averagePrecision': number;
       'averageRecall': number;
@@ -1373,7 +1378,7 @@ export class Utility {
       'averageSupport': number;
       'total': number;
     } = confusionMatrix.getMacroAverageMetrics();
-    const scoringConfusionMatrixOutputLineMacroAverage: any[] = [
+    const predictingConfusionMatrixOutputLineMacroAverage: any[] = [
       'Macro-Average',
       Utility.round(macroAverageMetrics.averagePrecision),
       Utility.round(macroAverageMetrics.averageRecall),
@@ -1386,7 +1391,7 @@ export class Utility {
       'N/A', // ---- Utility.round(macroAverageMetrics.averageSupport),
       'N/A', // ---- macroAverageMetrics.total,
     ];
-    scoringConfusionMatrixAverageOutputLines.push(scoringConfusionMatrixOutputLineMacroAverage);
+    predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLineMacroAverage);
     const summationMacroAverageMetrics: {
       'averagePrecision': number;
       'averageRecall': number;
@@ -1399,7 +1404,7 @@ export class Utility {
       'averageSupport': number;
       'total': number;
     } = confusionMatrix.getSummationMacroAverageMetrics();
-    const scoringConfusionMatrixOutputLineSummationMacroAverage: any[] = [
+    const predictingConfusionMatrixOutputLineSummationMacroAverage: any[] = [
       'Summation Macro-Average',
       Utility.round(summationMacroAverageMetrics.averagePrecision),
       Utility.round(summationMacroAverageMetrics.averageRecall),
@@ -1412,7 +1417,7 @@ export class Utility {
       Utility.round(summationMacroAverageMetrics.averageSupport),
       'N/A', // ---- summationMacroAverageMetrics.total,
     ];
-    scoringConfusionMatrixAverageOutputLines.push(scoringConfusionMatrixOutputLineSummationMacroAverage);
+    predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLineSummationMacroAverage);
     const positiveSupportLabelMacroAverageMetrics: {
       'averagePrecision': number;
       'averageRecall': number;
@@ -1425,7 +1430,7 @@ export class Utility {
       'averageSupport': number;
       'total': number;
     } = confusionMatrix.getPositiveSupportLabelMacroAverageMetrics();
-    const scoringConfusionMatrixOutputLinePositiveSupportLabelMacroAverage: any[] = [
+    const predictingConfusionMatrixOutputLinePositiveSupportLabelMacroAverage: any[] = [
       'Positive Support Macro-Average',
       Utility.round(positiveSupportLabelMacroAverageMetrics.averagePrecision),
       Utility.round(positiveSupportLabelMacroAverageMetrics.averageRecall),
@@ -1438,7 +1443,7 @@ export class Utility {
       'N/A', // ---- Utility.round(positiveSupportLabelMacroAverageMetrics.averageSupport),
       'N/A', // ---- positiveSupportLabelMacroAverageMetrics.total,
     ];
-    scoringConfusionMatrixAverageOutputLines.push(scoringConfusionMatrixOutputLinePositiveSupportLabelMacroAverage);
+    predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLinePositiveSupportLabelMacroAverage);
     const positiveSupportLabelSummationMacroAverageMetrics: {
       'averagePrecision': number;
       'averageRecall': number;
@@ -1451,7 +1456,7 @@ export class Utility {
       'averageSupport': number;
       'total': number;
     } = confusionMatrix.getPositiveSupportLabelSummationMacroAverageMetrics();
-    const scoringConfusionMatrixOutputLinePositiveSupportLabelSummationMacroAverage: any[] = [
+    const predictingConfusionMatrixOutputLinePositiveSupportLabelSummationMacroAverage: any[] = [
       'Positive Support Summation Macro-Average',
       Utility.round(positiveSupportLabelSummationMacroAverageMetrics.averagePrecision),
       Utility.round(positiveSupportLabelSummationMacroAverageMetrics.averageRecall),
@@ -1464,7 +1469,7 @@ export class Utility {
       Utility.round(positiveSupportLabelSummationMacroAverageMetrics.averageSupport),
       'N/A', // ---- positiveSupportLabelSummationMacroAverageMetrics.total,
     ];
-    scoringConfusionMatrixAverageOutputLines.push(scoringConfusionMatrixOutputLinePositiveSupportLabelSummationMacroAverage);
+    predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLinePositiveSupportLabelSummationMacroAverage);
     const weightedMacroAverageMetrics: {
       'averagePrecision': number;
       'averageRecall': number;
@@ -1473,7 +1478,7 @@ export class Utility {
       'averageSupport': number;
       'total': number;
     } = confusionMatrix.getWeightedMacroAverageMetrics();
-    const scoringConfusionMatrixOutputLineWeightedMacroAverage: any[] = [
+    const predictingConfusionMatrixOutputLineWeightedMacroAverage: any[] = [
       'Weighted Macro-Average',
       Utility.round(weightedMacroAverageMetrics.averagePrecision),
       Utility.round(weightedMacroAverageMetrics.averageRecall),
@@ -1486,7 +1491,7 @@ export class Utility {
       'N/A',
       'N/A', // ---- weightedMacroAverageMetrics.total,
     ];
-    scoringConfusionMatrixAverageOutputLines.push(scoringConfusionMatrixOutputLineWeightedMacroAverage);
+    predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLineWeightedMacroAverage);
     const summationWeightedMacroAverageMetrics: {
       'averagePrecision': number;
       'averageRecall': number;
@@ -1499,7 +1504,7 @@ export class Utility {
       'averageSupport': number;
       'total': number;
     } = confusionMatrix.getSummationWeightedMacroAverageMetrics();
-    const scoringConfusionMatrixOutputLineSummationWeightedMacroAverage: any[] = [
+    const predictingConfusionMatrixOutputLineSummationWeightedMacroAverage: any[] = [
       'Weighted Summation Macro-Average',
       Utility.round(summationWeightedMacroAverageMetrics.averagePrecision),
       Utility.round(summationWeightedMacroAverageMetrics.averageRecall),
@@ -1512,7 +1517,7 @@ export class Utility {
       Utility.round(summationWeightedMacroAverageMetrics.averageSupport),
       'N/A', // ---- summationWeightedMacroAverageMetrics.total,
     ];
-    scoringConfusionMatrixAverageOutputLines.push(scoringConfusionMatrixOutputLineSummationWeightedMacroAverage);
+    predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLineSummationWeightedMacroAverage);
     const subsetMacroAggregateMetrics: {
       'averagePrecision': number;
       'averageRecall': number;
@@ -1525,7 +1530,7 @@ export class Utility {
       'averageSupport': number;
       'total': number;
     } = multiLabelConfusionMatrixSubset.getMacroAverageMetrics();
-    const scoringConfusionMatrixOutputLineSubsetMacroAggregate: any[] = [
+    const predictingConfusionMatrixOutputLineSubsetMacroAggregate: any[] = [
       'Multi-Label Subset Aggregate',
       Utility.round(subsetMacroAggregateMetrics.averagePrecision),
       Utility.round(subsetMacroAggregateMetrics.averageRecall),
@@ -1538,7 +1543,7 @@ export class Utility {
       Utility.round(subsetMacroAggregateMetrics.averageSupport),
       subsetMacroAggregateMetrics.total,
     ];
-    scoringConfusionMatrixAverageOutputLines.push(scoringConfusionMatrixOutputLineSubsetMacroAggregate);
+    predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLineSubsetMacroAggregate);
     Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getMicroAverageMetrics())=${JSON.stringify(confusionMatrix.getMicroAverageMetrics())}`);
     Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getMacroAverageMetrics())=${JSON.stringify(confusionMatrix.getMacroAverageMetrics())}`);
     Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getWeightedMacroAverageMetrics())=${JSON.stringify(confusionMatrix.getWeightedMacroAverageMetrics())}`);
@@ -1553,10 +1558,11 @@ export class Utility {
     Utility.debuggingLog('Utility.generateConfusionMatrixMetricsAndHtmlTable(), finished generating {MODEL_EVALUATION} content');
     const confusionMatrixAverageMetricsHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
       'Average confusion matrix metrics',
-      scoringConfusionMatrixAverageOutputLines,
+      predictingConfusionMatrixAverageOutputLines,
       ['Type', 'Precision', 'Recall', 'F1', 'Accuracy', '#TruePositives', '#FalsePositives', '#TrueNegatives', '#FalseNegatives', 'Support', 'Total']);
     // -----------------------------------------------------------------------
-    return {confusionMatrix, multiLabelConfusionMatrixSubset, scoringConfusionMatrixOutputLines, confusionMatrixMetricsHtml, confusionMatrixAverageMetricsHtml};
+    return {confusionMatrix, multiLabelConfusionMatrixSubset, predictingConfusionMatrixOutputLines, confusionMatrixMetricsHtml, confusionMatrixAverageMetricsHtml};
+    */
   }
 
   public static generateLowConfidenceStatisticsAndHtmlTable(

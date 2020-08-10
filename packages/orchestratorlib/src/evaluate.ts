@@ -148,7 +148,7 @@ export class OrchestratorEvaluate {
         'confusionMatrixAnalysis': {
           'confusionMatrix': MultiLabelConfusionMatrix;
           'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
-          'scoringConfusionMatrixOutputLines': string[][];
+          'predictingConfusionMatrixOutputLines': string[][];
           'confusionMatrixMetricsHtml': string;
           'confusionMatrixAverageMetricsHtml': string;}; };
         'predictionScoreStructureArray': PredictionScoreStructure[];
