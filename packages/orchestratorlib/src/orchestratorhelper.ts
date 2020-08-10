@@ -130,17 +130,17 @@ export class OrchestratorHelper {
       entityRecognizers: recognizers,
     };
 
-    let recoFileName = path.join(out, `${baseName}.lu.dialog`);
+    const recoFileName: string = path.join(out, `${baseName}.lu.dialog`);
     this.writeToFile(recoFileName, JSON.stringify(recoContent, null, 2));
-    let multiRecoContent = {
-      "$kind": "Microsoft.MultiLanguageRecognizer",
-      "recognizers": {
-          "en-us": `${baseName}.en-us.lu`,
-          "": `${baseName}.en-us.lu`
-      }
+    const multiRecoContent: any = {
+      $kind: 'Microsoft.MultiLanguageRecognizer',
+      recognizers: {
+        'en-us': `${baseName}.en-us.lu`,
+        '': `${baseName}.en-us.lu`,
+      },
     };
 
-    let multiRecoFileName = path.join(out, `${baseName}.en-us.lu.dialog`);
+    const multiRecoFileName: string = path.join(out, `${baseName}.en-us.lu.dialog`);
     this.writeToFile(multiRecoFileName, JSON.stringify(multiRecoContent, null, 2));
     return baseName;
   }
@@ -152,19 +152,18 @@ export class OrchestratorHelper {
         'snapshots': string;
       };
     } = {
-      'orchestrator': {
-        'modelPath': nlrpath,
-        'snapshots': settings
-      }
+      orchestrator: {
+        modelPath: nlrpath,
+        snapshots: settings,
+      },
     };
 
-    const contentFileName: string = path.join(out, `orchestrator.settings.json`);
+    const contentFileName: string = path.join(out, 'orchestrator.settings.json');
 
     this.writeToFile(contentFileName, JSON.stringify(content, null, 2));
   }
 
-  public static async getEntitiesInLu(input: string): Promise<any>
-  {
+  public static async getEntitiesInLu(input: string): Promise<any> {
     const fileContents: string = OrchestratorHelper.readFile(input);
     const luObject: any = {
       content: fileContents,
@@ -178,15 +177,15 @@ export class OrchestratorHelper {
     if (luisObject.prebuiltEntities === undefined || !Array.isArray(luisObject.prebuiltEntities) || luisObject.prebuiltEntities.length === 0) return [];
     const entitiesList: any = [];
     (luisObject.prebuiltEntities || []).forEach((item: any) => {
-      const mapValue = PrebuiltToRecognizerMap[item.name.toLowerCase().trim()];
+      const mapValue: any = PrebuiltToRecognizerMap[item.name.toLowerCase().trim()];
       if (mapValue !== undefined && mapValue !== '') {
         entitiesList.push({
-          '$kind': mapValue
+          $kind: mapValue,
         });
       } else {
         process.stdout.write(`\n[WARN:] No entity recognizer available for Prebuilt entity '${item.name}'\n`);
       }
-    })
+    });
     return entitiesList;
   }
 
