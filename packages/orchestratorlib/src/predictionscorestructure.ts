@@ -5,7 +5,9 @@
 
 import {Result}  from './result';
 
-export class ScoreStructure {
+import {PredictionStructure}  from './predictionstructure';
+
+export class PredictionScoreStructure extends PredictionStructure {
   // eslint-disable-next-line max-params
   constructor(
     utterance: string,
@@ -22,15 +24,16 @@ export class ScoreStructure {
     scoreArray: number[],
     predictedScoreStructureHtmlTable: string,
     labelsScoreStructureHtmlTable: string) {
-    this.utterance = utterance;
-    this.labelsPredictedEvaluation = labelsPredictedEvaluation;
-    this.labels = labels;
-    this.labelsConcatenated = labelsConcatenated;
-    this.labelsIndexes = labelsIndexes;
-    this.labelsPredicted = labelsPredicted;
-    this.labelsPredictedConcatenated = labelsPredictedConcatenated;
+    super(
+      utterance,
+      labelsPredictedEvaluation,
+      labels,
+      labelsConcatenated,
+      labelsIndexes,
+      labelsPredicted,
+      labelsPredictedConcatenated,
+      labelsPredictedIndexes);
     this.labelsPredictedScore = labelsPredictedScore;
-    this.labelsPredictedIndexes = labelsPredictedIndexes;
     this.labelsPredictedClosestText = labelsPredictedClosestText;
     this.scoreResultArray = scoreResultArray;
     this.scoreArray = scoreArray;
@@ -71,23 +74,7 @@ export class ScoreStructure {
     };
   }
 
-  public utterance: string;
-
-  public labelsPredictedEvaluation: number; // ---- 0: TP, 1, FN, 2: FP, 3: TN
-
-  public labels: string[];
-
-  public labelsConcatenated: string;
-
-  public labelsIndexes: number[];
-
-  public labelsPredicted: string[];
-
-  public labelsPredictedConcatenated: string;
-
   public labelsPredictedScore: number;
-
-  public labelsPredictedIndexes: number[];
 
   public labelsPredictedClosestText: string[];
 

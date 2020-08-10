@@ -15,6 +15,12 @@ export class Label {
     return new Label(LabelType.Entity, label, new Span(spanOffset, spanLength));
   }
 
+  public labeltype: LabelType;
+
+  public name: string;
+
+  public span: Span;
+
   constructor(labeltype: LabelType, name: string, span: Span) {
     this.labeltype = labeltype;
     this.name = name;
@@ -83,10 +89,4 @@ export class Label {
     }
     return false;
   }
-
-  public labeltype: LabelType;
-
-  public name: string;
-
-  public span: Span;
 }
