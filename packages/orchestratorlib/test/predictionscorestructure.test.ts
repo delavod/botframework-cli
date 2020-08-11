@@ -11,12 +11,12 @@ import {Label} from '../src/label';
 import {LabelType} from '../src/labeltype';
 import {Span} from '../src/span';
 import {Result} from '../src/result';
-import {ScoreStructure} from '../src/scorestructure';
+import {PredictionScoreStructure} from '../src/predictionscorestructure';
 import {Utility} from '../src/utility';
 import {UnitTestHelper} from './utility.test';
 
 describe('Test Suite - scorestructure', () => {
-  it('Test.0000 ScoreStructure - constructor()', function () {
+  it('Test.0000 PredictionScoreStructure - constructor()', function () {
     Utility.toPrintDebuggingLogToConsole = UnitTestHelper.getDefaultUnitTestDebuggingLogFlag();
     this.timeout(UnitTestHelper.getDefaultUnitTestTimeout());
     const utterance: string = 'utterance';
@@ -33,7 +33,7 @@ describe('Test Suite - scorestructure', () => {
     const scoreArray: number[] = [0.99];
     const predictedScoreStructureHtmlTable: string = 'nothing-for-now';
     const labelsScoreStructureHtmlTable: string = 'nothing-for-now';
-    const scorestructure: ScoreStructure = new ScoreStructure(
+    const scorestructure: PredictionScoreStructure = new PredictionScoreStructure(
       utterance,
       labelsPredictedEvaluation,
       labels,

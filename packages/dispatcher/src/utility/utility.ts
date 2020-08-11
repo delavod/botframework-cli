@@ -1334,8 +1334,9 @@ export class Utility {
                 "outputFilename is empty");
         }
         if (Utility.isEmptyStringArrays(outputEvaluationReportDataArrays)) {
-            Utility.debuggingThrow(
-                "outputEvaluationReportDataArrays is empty");
+            return "";
+            // ---- Utility.debuggingThrow(
+            // ----     "outputEvaluationReportDataArrays is empty");
         }
         const outputLines: string[] = [];
         if (!Utility.isEmptyStringArray(outputDataArraryHeaders)) {

@@ -151,7 +151,7 @@ describe("Test Suite - data_structure/DictionaryMapUtility", () => {
         assert.ok((utteranceLabelDuplicateMap.get("B") as Set<string>).has(DictionaryMapUtility.UnknownLabel));
         assert.ok((utteranceLabelDuplicateMap.get("C") as Set<string>).size === 1);
         assert.ok((utteranceLabelDuplicateMap.get("C") as Set<string>).has(DictionaryMapUtility.UnknownLabel));
-      });
+    });
     it("Test.0101 Utility.processUnknowLabelsInUtteranceLabelsMapUsingLabelSet()", function () {
         Utility.toPrintDebuggingLogToConsole = UnitTestHelper.getDefaultUnitTestDebuggingLogFlag();
         this.timeout(UnitTestHelper.getDefaultUnitTestTimeout());
@@ -210,5 +210,5 @@ describe("Test Suite - data_structure/DictionaryMapUtility", () => {
         assert.ok((utteranceLabelDuplicateMap.get("B") as Set<string>).has(DictionaryMapUtility.UnknownLabel));
         assert.ok((utteranceLabelDuplicateMap.get("C") as Set<string>).size === 1);
         assert.ok((utteranceLabelDuplicateMap.get("C") as Set<string>).has(DictionaryMapUtility.UnknownLabel));
-      });
+    });
 });

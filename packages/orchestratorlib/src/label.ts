@@ -15,6 +15,20 @@ export class Label {
     return new Label(LabelType.Entity, label, new Span(spanOffset, spanLength));
   }
 
+  public static newIntentLabelByPosition(
+    label: string,
+    spanStartPosition: number = 0,
+    spanEndPosition: number = 0): Label {
+    return new Label(LabelType.Intent, label, new Span(spanStartPosition, spanEndPosition - spanStartPosition + 1));
+  }
+
+  public static newEntityLabelByPosition(
+    label: string,
+    spanStartPosition: number = 0,
+    spanEndPosition: number = 0): Label {
+    return new Label(LabelType.Entity, label, new Span(spanStartPosition, spanEndPosition - spanStartPosition + 1));
+  }
+
   public labeltype: LabelType;
 
   public name: string;
@@ -25,6 +39,10 @@ export class Label {
     this.labeltype = labeltype;
     this.name = name;
     this.span = span;
+  }
+
+  public toSimpleString(): string {
+    return `${this.name}-${this.labeltype}-${this.span.offset}-${this.span.length}`;
   }
 
   public toObject(): {
@@ -60,7 +78,7 @@ export class Label {
       entity: this.name,
       startPos: this.getStartPos(),
       endPos: this.getEndPos(),
-      text: utterance.substring(this.getStartPos(), this.getEndPos()),
+      text: utterance.substring(this.getStartPos(), this.getEndPos() + 1),
     };
   }
 
@@ -69,7 +87,7 @@ export class Label {
   }
 
   public getEndPos(): number {
-    return this.span.offset + this.span.length;
+    return this.span.offset + this.span.length - 1;
   }
 
   public equals(other: Label): boolean {

@@ -12,6 +12,10 @@ export class MathematicsHelper implements IMathematicsHelper {
     public static epsilon: number = Utility.epsilon;
     public static epsilonUp: number = 1 - MathematicsHelper.epsilon;
 
+    public static epsilonMinute: number = 0.000000001;
+    public static epsilonMinuteUp: number = 1 - MathematicsHelper.epsilonMinute;
+    public static epsilonMinuteNegative: number = -MathematicsHelper.epsilonMinute;
+
     public static readonly mathematicsHelperObject: IMathematicsHelper = new MathematicsHelper();
 
     public static GetMathematicsHelperObject(): IMathematicsHelper {
@@ -3666,5 +3670,16 @@ export class MathematicsHelper implements IMathematicsHelper {
             return MathematicsHelper.epsilonUp;
         }
         return value;
+    }
+
+    public safeZeroSmallNegativeErrorSubtract(value0: number, value1: number): number {
+        const difference: number = value0 - value1;
+        if (difference >= 0) {
+            return difference;
+        }
+        if (difference > MathematicsHelper.epsilonMinuteNegative) {
+            return 0;
+        }
+        return difference;
     }
 }

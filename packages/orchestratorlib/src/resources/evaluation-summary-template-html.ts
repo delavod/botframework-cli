@@ -121,7 +121,7 @@ export class EvaluationSummaryTemplateHtml {
             <div class="tab-pane active" id="intent-utterance-statistics" role="tabpanel" aria-labelledby="intent-utterance-statistics-tab">
                 <p>Intent and utterance statistics</p>
                 <p>
-                    {INTENT_UTTERANCE_STATISTICS}
+                    {LABEL_TEXT_STATISTICS}
                 </p>
             </div>
             <div class="tab-pane" id="utterance-duplicates" role="tabpanel" aria-labelledby="utterance-duplicates-tab">
@@ -129,7 +129,7 @@ export class EvaluationSummaryTemplateHtml {
                    It's not a serious problem as they will be deduped.
                 </p>
                 <p>
-                    {UTTERANCE_DUPLICATES}
+                    {TEXT_DUPLICATES}
                 </p>
             </div>
             <div class="tab-pane" id="ambiguous" role="tabpanel" aria-labelledby="ambiguous-tab">
@@ -141,13 +141,13 @@ export class EvaluationSummaryTemplateHtml {
             <div class="tab-pane" id="misclassified" role="tabpanel" aria-labelledby="misclassified-tab">
                 <p>Utterance(s) yielding predicted intent that is not originally labeled with</p>
                 <p>
-                    {MISCLASSIFICATION}
+                    {MIS_CLASSIFICATION}
                 </p>
             </div>
             <div class="tab-pane" id="lowconfidence" role="tabpanel" aria-labelledby="lowconfidence-tab">
                 <p>Utterance(s) whose intents were correctly predicted (as a subset of the labeled intents), but the prediction score is low</p>
                 <p>
-                    {LOWCONFIDENCE}
+                    {LOW_CONFIDENCE}
                 </p>
             </div>
             <div class="tab-pane" id="model-evaluation" role="tabpanel" aria-labelledby="model-evaluation-tab">

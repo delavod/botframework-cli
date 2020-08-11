@@ -1165,4 +1165,6 @@ export interface IMathematicsHelper {
     safeLog(value: number): number;
 
     clipValue(value: number): number;
+
+    safeZeroSmallNegativeErrorSubtract(value0: number, value1: number): number;
 }

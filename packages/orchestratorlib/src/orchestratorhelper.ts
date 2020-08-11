@@ -506,7 +506,7 @@ export class OrchestratorHelper {
     const startPos: number = Number(entityEntry.startPos);
     const endPos: number = Number(entityEntry.endPos);
     // const entityMention: string = entityEntry.text;
-    const entityLabel: Label = new Label(LabelType.Entity, entity, new Span(startPos, endPos - startPos));
+    const entityLabel: Label = new Label(LabelType.Entity, entity, new Span(startPos, endPos - startPos + 1));
     if (existingEntityLabels) {
       if (!OrchestratorHelper.addUniqueEntityLabel(entityLabel, existingEntityLabels)) {
         Utility.insertStringLabelPairToStringIdLabelSetNativeMap(utterance, entityLabel, utteranceEntityLabelDuplicateMap);

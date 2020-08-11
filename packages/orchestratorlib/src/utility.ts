@@ -6,21 +6,25 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import {IConfusionMatrix} from '@microsoft/bf-dispatcher';
 import {BinaryConfusionMatrix} from '@microsoft/bf-dispatcher';
 import {MultiLabelConfusionMatrix} from '@microsoft/bf-dispatcher';
 import {MultiLabelConfusionMatrixSubset} from '@microsoft/bf-dispatcher';
+import {MultiLabelObjectConfusionMatrix} from '@microsoft/bf-dispatcher';
+// import {MultiLabelObjectConfusionMatrixSubset} from '@microsoft/bf-dispatcher';
 
 import {Example} from './example';
 import {Label} from './label';
 import {LabelType} from './labeltype';
 import {LabelResolver} from './labelresolver';
 import {OrchestratorHelper} from './orchestratorhelper';
+import {PredictionLabelStructure} from './predictionlabelstructure';
 import {PredictionStructure} from './predictionstructure';
-import {Result} from './result';
 import {PredictionScoreStructure} from './predictionscorestructure';
+import {Result} from './result';
 import {Span} from './span';
 
-import {AssessmentIntentSummaryTemplateHtml} from './resources/assessment-intent-summary-template-html';
+import {AssessmentLabelSummaryTemplateHtml} from './resources/assessment-label-summary-template-html';
 import {EvaluationSummaryTemplateHtml} from './resources/evaluation-summary-template-html';
 
 export class Utility {
@@ -170,6 +174,461 @@ export class Utility {
   }
 
   // eslint-disable-next-line max-params
+  public static generateAssessmentLabelObjectEvaluationReport(
+    groundTruthSetLabels: string[],
+    groundTruthSetUtteranceEntityLabelsMap: { [id: string]: Label[] },
+    groundTruthSetUtteranceEntityLabelDuplicateMap: Map<string, Label[]>,
+    predictionSetUtteranceEntityLabelsMap: { [id: string]: Label[] },
+    predictionSetUtteranceEntityLabelDuplicateMap: Map<string, Label[]>): {
+      'evaluationReportGroundTruthSetLabelUtteranceStatistics': {
+        'evaluationSummary': string;
+        'labelArrayAndMap': {
+          'stringArray': string[];
+          'stringMap': {[id: string]: number};};
+        'labelStatisticsAndHtmlTable': {
+          'labelUtterancesMap': { [id: string]: string[] };
+          'labelUtterancesTotal': number;
+          'labelStatistics': string[][];
+          'labelStatisticsHtml': string;};
+        'utteranceStatisticsAndHtmlTable': {
+          'utteranceStatisticsMap': {[id: number]: number};
+          'utteranceStatistics': [string, number][];
+          'utteranceCount': number;
+          'utteranceStatisticsHtml': string;};
+        'utterancesMultiLabelArrays': [string, string][];
+        'utterancesMultiLabelArraysHtml': string;
+        'utteranceLabelDuplicateHtml': string; };
+      'evaluationReportPredictionSetLabelUtteranceStatistics': {
+        'evaluationSummary': string;
+        'labelArrayAndMap': {
+          'stringArray': string[];
+          'stringMap': {[id: string]: number};};
+        'labelStatisticsAndHtmlTable': {
+          'labelUtterancesMap': { [id: string]: string[] };
+          'labelUtterancesTotal': number;
+          'labelStatistics': string[][];
+          'labelStatisticsHtml': string;};
+        'utteranceStatisticsAndHtmlTable': {
+          'utteranceStatisticsMap': {[id: number]: number};
+          'utteranceStatistics': [string, number][];
+          'utteranceCount': number;
+          'utteranceStatisticsHtml': string;};
+        'utterancesMultiLabelArrays': [string, string][];
+        'utterancesMultiLabelArraysHtml': string;
+        'utteranceLabelDuplicateHtml': string; };
+      'evaluationReportAnalyses': {
+        'evaluationSummary': string;
+        'misclassifiedAnalysis': {
+          'predictingMisclassifiedUtterancesArrays': string[][];
+          'predictingMisclassifiedUtterancesArraysHtml': string;
+          'predictingMisclassifiedUtterancesSimpleArrays': string[][];};
+        'confusionMatrixAnalysis': {
+          'confusionMatrix': IConfusionMatrix;
+          'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
+          'predictingConfusionMatrixOutputLines': string[][];
+          'confusionMatrixMetricsHtml': string;
+          'confusionMatrixAverageMetricsHtml': string;}; };
+      'predictionLabelStructureArray': PredictionLabelStructure[];
+    } {
+    // ---- NOTE ---- load the assessment evaluation summary template.
+    const evaluationSummary: string = AssessmentLabelSummaryTemplateHtml.html;
+    // ---- NOTE ---- generate evaluation report for the ground-truth set.
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReport(), ready to call Utility.generateEvaluationReportLabelUtteranceStatistics()');
+    const evaluationReportGroundTruthSetLabelUtteranceStatistics: {
+      'evaluationSummary': string;
+      'labelArrayAndMap': {
+        'stringArray': string[];
+        'stringMap': {[id: string]: number};};
+      'labelStatisticsAndHtmlTable': {
+        'labelUtterancesMap': { [id: string]: string[] };
+        'labelUtterancesTotal': number;
+        'labelStatistics': string[][];
+        'labelStatisticsHtml': string;};
+      'utteranceStatisticsAndHtmlTable': {
+        'utteranceStatisticsMap': {[id: number]: number};
+        'utteranceStatistics': [string, number][];
+        'utteranceCount': number;
+        'utteranceStatisticsHtml': string;};
+      'utterancesMultiLabelArrays': [string, string][];
+      'utterancesMultiLabelArraysHtml': string;
+      'utteranceLabelDuplicateHtml': string;
+    } = Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(
+      evaluationSummary,
+      groundTruthSetLabels,
+      groundTruthSetUtteranceEntityLabelsMap,
+      groundTruthSetUtteranceEntityLabelDuplicateMap,
+      '{GROUND_TRUTH_SET_LABEL_TEXT_STATISTICS}',
+      '{GROUND_TRUTH_SET_TEXT_DUPLICATES}',
+      false); // ---- NOTE ---- false, as the 'assess' does not use an unknown threshold to generate UNKNOWN prediction,
+    // ---- NOTE ----           so unknown labels are purely and already processed by the data processing logic before.
+    if (Utility.toPrintDetailedDebuggingLogToConsole) {
+      Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReport(), evaluationReportGroundTruthSetLabelUtteranceStatistics.evaluationSummary=\n${evaluationReportGroundTruthSetLabelUtteranceStatistics.evaluationSummary}`);
+    }
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReport(), finished calling Utility.evaluationReportGroundTruthSetLabelUtteranceStatistics()');
+    // ---- NOTE ---- generate evaluation report for the prediction set.
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReport(), ready to call Utility.evaluationReportGroundTruthSetLabelUtteranceStatistics()');
+    const evaluationReportPredictionSetLabelUtteranceStatistics: {
+      'evaluationSummary': string;
+      'labelArrayAndMap': {
+        'stringArray': string[];
+        'stringMap': {[id: string]: number};};
+      'labelStatisticsAndHtmlTable': {
+        'labelUtterancesMap': { [id: string]: string[] };
+        'labelUtterancesTotal': number;
+        'labelStatistics': string[][];
+        'labelStatisticsHtml': string;};
+      'utteranceStatisticsAndHtmlTable': {
+        'utteranceStatisticsMap': {[id: number]: number};
+        'utteranceStatistics': [string, number][];
+        'utteranceCount': number;
+        'utteranceStatisticsHtml': string;};
+      'utterancesMultiLabelArrays': [string, string][];
+      'utterancesMultiLabelArraysHtml': string;
+      'utteranceLabelDuplicateHtml': string;
+    } = Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(
+      evaluationReportGroundTruthSetLabelUtteranceStatistics.evaluationSummary,
+      groundTruthSetLabels,
+      predictionSetUtteranceEntityLabelsMap,
+      predictionSetUtteranceEntityLabelDuplicateMap,
+      '{PREDICTION_SET_LABEL_TEXT_STATISTICS}',
+      '{PREDICTION_SET_TEXT_DUPLICATES}',
+      false); // ---- NOTE ---- false, as the 'assess' does not use an unknown threshold to generate UNKNOWN prediction,
+    // ---- NOTE ----           so unknown labels are purely and already processed by the data processing logic before.
+    if (Utility.toPrintDetailedDebuggingLogToConsole) {
+      Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReport(), evaluationReportPredictionSetLabelUtteranceStatistics.evaluationSummary=\n${evaluationReportPredictionSetLabelUtteranceStatistics.evaluationSummary}`);
+    }
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReport(), finished calling Utility.generateEvaluationReportLabelUtteranceStatistics()');
+    // ---- NOTE ---- produce prediction evaluation
+    const predictionLabelStructureArray: PredictionLabelStructure[] = Utility.assessLabelObjectPredictions(
+      groundTruthSetUtteranceEntityLabelsMap,
+      predictionSetUtteranceEntityLabelsMap,
+      evaluationReportGroundTruthSetLabelUtteranceStatistics.labelArrayAndMap);
+    // ---- NOTE ---- generate evaluation report.
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReport(), ready to call Utility.generateEvaluationReportAnalyses()');
+    const evaluationReportAnalyses: {
+      'evaluationSummary': string;
+      'misclassifiedAnalysis': {
+        'predictingMisclassifiedUtterancesArrays': string[][];
+        'predictingMisclassifiedUtterancesArraysHtml': string;
+        'predictingMisclassifiedUtterancesSimpleArrays': string[][];};
+      'confusionMatrixAnalysis': {
+        'confusionMatrix': IConfusionMatrix;
+        'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
+        'predictingConfusionMatrixOutputLines': string[][];
+        'confusionMatrixMetricsHtml': string;
+        'confusionMatrixAverageMetricsHtml': string;};
+    } = Utility.generateAssessmentLabelObjectEvaluationReportAnalyses(
+      evaluationReportPredictionSetLabelUtteranceStatistics.evaluationSummary,
+      predictionLabelStructureArray,
+      evaluationReportGroundTruthSetLabelUtteranceStatistics.labelArrayAndMap);
+    if (Utility.toPrintDetailedDebuggingLogToConsole) {
+      Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReport(), evaluationReportAnalyses.evaluationSummary=\n${evaluationReportAnalyses.evaluationSummary}`);
+    }
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReport(), finished calling Utility.generateEvaluationReportAnalyses()');
+    // ---- NOTE ---- debugging ouput.
+    if (Utility.toPrintDetailedDebuggingLogToConsole) {
+      Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReport(), JSON.stringify(labelArrayAndMap.stringArray)=${JSON.stringify(evaluationReportGroundTruthSetLabelUtteranceStatistics.labelArrayAndMap.stringArray)}`);
+      Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReport(), JSON.stringify(labelArrayAndMap.stringMap)=${JSON.stringify(evaluationReportGroundTruthSetLabelUtteranceStatistics.labelArrayAndMap.stringMap)}`);
+      const labels: any = LabelResolver.getLabels(LabelType.Intent);
+      Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReport(), JSON.stringify(labels)=${JSON.stringify(labels)}`);
+    }
+    // ---- NOTE ---- return
+    return {
+      evaluationReportGroundTruthSetLabelUtteranceStatistics,
+      evaluationReportPredictionSetLabelUtteranceStatistics,
+      evaluationReportAnalyses,
+      predictionLabelStructureArray};
+  }
+
+  // eslint-disable-next-line max-params
+  public static generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(
+    evaluationSummary: string,
+    trainingSetLabels: string[],
+    utteranceEntityLabelsMap: { [id: string]: Label[] },
+    utteranceEntityLabelDuplicateMap: Map<string, Label[]>,
+    evaluationSummaryTagEntityLabelUtteranceStatistics: string,
+    evaluationSummaryTagUtteranceDuplicates: string,
+    ensureUnknownLabelInLabelArrayAndMap: boolean): {
+      'evaluationSummary': string;
+      'labelArrayAndMap': {
+        'stringArray': string[];
+        'stringMap': {[id: string]: number};};
+      'labelStatisticsAndHtmlTable': {
+        'labelUtterancesMap': { [id: string]: string[] };
+        'labelUtterancesTotal': number;
+        'labelStatistics': string[][];
+        'labelStatisticsHtml': string;};
+      'utteranceStatisticsAndHtmlTable': {
+        'utteranceStatisticsMap': {[id: number]: number};
+        'utteranceStatistics': [string, number][];
+        'utteranceCount': number;
+        'utteranceStatisticsHtml': string;};
+      'utterancesMultiLabelArrays': [string, string][];
+      'utterancesMultiLabelArraysHtml': string;
+      'utteranceLabelDuplicateHtml': string;
+    } {
+    // ---- NOTE ---- create a label-index map.
+    const labelArrayAndMap: {
+      'stringArray': string[];
+      'stringMap': {[id: string]: number};} =
+      Utility.buildStringIdNumberValueDictionaryFromStringArray(trainingSetLabels);
+    Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(), JSON.stringify(labelArrayAndMap.stringArray)=${JSON.stringify(labelArrayAndMap.stringArray)}`);
+    Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(), JSON.stringify(labelArrayAndMap.stringMap)=${JSON.stringify(labelArrayAndMap.stringMap)}`);
+    // ---- TODO ---- if (Utility.isEmptyStringArray(labelArrayAndMap.stringArray)) {
+    // ---- TODO ----   Utility.debuggingThrow('there is no label, something wrong?');
+    // ---- TODO ---- }
+    // ---- NOTE ---- as the unknown threshold is greater than 0, the score function can make an UNKNOWN prediction.
+    if (ensureUnknownLabelInLabelArrayAndMap) {
+      if (!(Utility.UnknownLabel in labelArrayAndMap.stringMap)) {
+        labelArrayAndMap.stringArray.push(Utility.UnknownLabel);
+        labelArrayAndMap.stringMap[Utility.UnknownLabel] = labelArrayAndMap.stringArray.length - 1;
+      }
+    }
+    Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(), JSON.stringify(labelArrayAndMap.stringArray)=${JSON.stringify(labelArrayAndMap.stringArray)}`);
+    Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(), JSON.stringify(labelArrayAndMap.stringMap)=${JSON.stringify(labelArrayAndMap.stringMap)}`);
+    // ---- NOTE ---- generate label statistics.
+    const labelStatisticsAndHtmlTable: {
+      'labelUtterancesMap': { [id: string]: string[] };
+      'labelUtterancesTotal': number;
+      'labelStatistics': string[][];
+      'labelStatisticsHtml': string; } = Utility.generateLabelStatisticsAndHtmlTable(
+        Utility.convertUtteranceEntityLabelsMap(utteranceEntityLabelsMap),
+        labelArrayAndMap);
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(), finish calling Utility.generateLabelStatisticsAndHtmlTable()');
+    // ---- NOTE ---- generate utterance statistics
+    const utteranceStatisticsAndHtmlTable: {
+      'utteranceStatisticsMap': {[id: number]: number};
+      'utteranceStatistics': [string, number][];
+      'utteranceCount': number;
+      'utteranceStatisticsHtml': string; } = Utility.generateUtteranceStatisticsAndHtmlTable(
+        Utility.convertUtteranceEntityLabelsMap(utteranceEntityLabelsMap));
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(), finish calling Utility.generateUtteranceStatisticsAndHtmlTable()');
+    // ---- NOTE ---- create the evaluation LABEL_TEXT_STATISTICS summary from template.
+    const labelsUtterancesStatisticsHtml: string =
+      labelStatisticsAndHtmlTable.labelStatisticsHtml + utteranceStatisticsAndHtmlTable.utteranceStatisticsHtml;
+    evaluationSummary = evaluationSummary.replace(
+      evaluationSummaryTagEntityLabelUtteranceStatistics, labelsUtterancesStatisticsHtml);
+    Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(), finished generating ${evaluationSummaryTagEntityLabelUtteranceStatistics} content`);
+    // ---- NOTE ---- generate duplicate report.
+    const utterancesMultiLabelArrays: [string, string][] = Object.entries(utteranceEntityLabelsMap).filter(
+      (x: [string, Label[]]) => x[1].length > 1).map((x: [string, Label[]]) => [x[0], x[1].map((x: Label) => x.toSimpleString()).join(',')]);
+    const utterancesMultiLabelArraysHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
+      'Multi-label utterances and their labels',
+      utterancesMultiLabelArrays,
+      ['Utterance', 'Labels']);
+    // ---- NOTE ---- generate duplicate report.
+    const utteranceLabelDuplicateHtml: string = Utility.convertMapArrayToIndexedHtmlTable(
+      'Duplicate utterance and label pairs',
+      utteranceEntityLabelDuplicateMap,
+      ['Utterance', 'Label']);
+    // ---- NOTE ---- create the evaluation TEXT_DUPLICATES summary from template.
+    const duplicateStatisticsHtml: string =
+      utterancesMultiLabelArraysHtml + utteranceLabelDuplicateHtml;
+    evaluationSummary = evaluationSummary.replace(
+      evaluationSummaryTagUtteranceDuplicates, duplicateStatisticsHtml);
+    Utility.debuggingLog(`Utility.generateAssessmentLabelObjectEvaluationReportLabelUtteranceStatistics(), finished generating ${evaluationSummaryTagUtteranceDuplicates} content`);
+    // ---- NOTE ---- return
+    return {
+      evaluationSummary,
+      labelArrayAndMap,
+      labelStatisticsAndHtmlTable,
+      utteranceStatisticsAndHtmlTable,
+      utterancesMultiLabelArrays,
+      utterancesMultiLabelArraysHtml,
+      utteranceLabelDuplicateHtml};
+  }
+
+  public static convertUtteranceEntityLabelsMap(utteranceEntityLabelsMap: { [id: string]: Label[] }): { [id: string]: string[] } {
+    const utteranceLabelsMap: { [id: string]: string[] } = {};
+    for (const utteranceEntityLabels of Object.entries(utteranceEntityLabelsMap)) {
+      utteranceLabelsMap[utteranceEntityLabels[0]] = utteranceEntityLabels[1].map((x: Label) => x.name);
+    }
+    return utteranceLabelsMap;
+  }
+
+  // eslint-disable-next-line max-params
+  public static generateAssessmentLabelObjectEvaluationReportAnalyses(
+    evaluationSummary: string,
+    predictionLabelStructureArray: PredictionLabelStructure[],
+    labelArrayAndMap: {
+      'stringArray': string[];
+      'stringMap': {[id: string]: number};}): {
+      'evaluationSummary': string;
+      'misclassifiedAnalysis': {
+        'predictingMisclassifiedUtterancesArrays': string[][];
+        'predictingMisclassifiedUtterancesArraysHtml': string;
+        'predictingMisclassifiedUtterancesSimpleArrays': string[][];};
+      'confusionMatrixAnalysis': {
+        'confusionMatrix': IConfusionMatrix;
+        'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
+        'predictingConfusionMatrixOutputLines': string[][];
+        'confusionMatrixMetricsHtml': string;
+        'confusionMatrixAverageMetricsHtml': string;};
+    } {
+    // ---- NOTE ---- generate misclassified HTML.
+    const misclassifiedAnalysis: {
+      'predictingMisclassifiedUtterancesArrays': string[][];
+      'predictingMisclassifiedUtterancesArraysHtml': string;
+      'predictingMisclassifiedUtterancesSimpleArrays': string[][];
+    } = Utility.generateAssessmentLabelObjectMisclassifiedStatisticsAndHtmlTable(
+      predictionLabelStructureArray);
+    evaluationSummary = evaluationSummary.replace(
+      '{MIS_CLASSIFICATION}', misclassifiedAnalysis.predictingMisclassifiedUtterancesArraysHtml);
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReportAnalyses(), finished generating {MIS_CLASSIFICATION} content');
+    // ---- NOTE ---- produce confusion matrix result.
+    const confusionMatrixAnalysis: {
+      'confusionMatrix': IConfusionMatrix;
+      'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
+      'predictingConfusionMatrixOutputLines': string[][];
+      'confusionMatrixMetricsHtml': string;
+      'confusionMatrixAverageMetricsHtml': string;
+    } = Utility.generateAssessmentLabelObjectConfusionMatrixMetricsAndHtmlTable(
+      predictionLabelStructureArray,
+      labelArrayAndMap);
+    evaluationSummary = evaluationSummary.replace(
+      '{MODEL_EVALUATION}',
+      confusionMatrixAnalysis.confusionMatrixMetricsHtml + confusionMatrixAnalysis.confusionMatrixAverageMetricsHtml);
+    Utility.debuggingLog('Utility.generateAssessmentLabelObjectEvaluationReportAnalyses(), finished generating {MODEL_EVALUATION} content');
+    // ---- NOTE ---- return
+    return {
+      evaluationSummary,
+      misclassifiedAnalysis,
+      confusionMatrixAnalysis};
+  }
+
+  public static generateAssessmentLabelObjectMisclassifiedStatisticsAndHtmlTable(
+    predictionLabelStructureArray: PredictionLabelStructure[]): {
+      'predictingMisclassifiedUtterancesArrays': string[][];
+      'predictingMisclassifiedUtterancesArraysHtml': string;
+      'predictingMisclassifiedUtterancesSimpleArrays': string[][];
+    } {
+    const predictingMisclassifiedUtterancesArrays: string[][] = [];
+    const predictingMisclassifiedUtterancesSimpleArrays: string[][] = [];
+    for (const predictionLabelStructure of predictionLabelStructureArray.filter((x: PredictionLabelStructure) => (x.labelsPredictedEvaluation[1] > 0) || (x.labelsPredictedEvaluation[2] > 0))) {
+      if (predictionLabelStructure) {
+        const labelsPredictionStructureHtmlTable: string = predictionLabelStructure.labelsConcatenated; // ---- NOTE-PLACE-HOLDER ---- may need more elaborate output
+        const predictedPredictionStructureHtmlTable: string = predictionLabelStructure.labelsPredictedConcatenated; // ---- NOTE-PLACE-HOLDER ---- may need more elaborate output
+        const predictingMisclassifiedUtterancesArray: string[] = [
+          predictionLabelStructure.utterance,
+          labelsPredictionStructureHtmlTable,
+          predictedPredictionStructureHtmlTable,
+        ];
+        predictingMisclassifiedUtterancesArrays.push(predictingMisclassifiedUtterancesArray);
+        const labelsConcatenated: string = predictionLabelStructure.labelsConcatenated;
+        const labelsPredictedConcatenated: string = predictionLabelStructure.labelsPredictedConcatenated;
+        const predictingMisclassifiedUtterancesSimpleArray: string[] = [
+          predictionLabelStructure.utterance,
+          labelsConcatenated,
+          labelsPredictedConcatenated,
+        ];
+        predictingMisclassifiedUtterancesSimpleArrays.push(predictingMisclassifiedUtterancesSimpleArray);
+      }
+    }
+    const predictingMisclassifiedUtterancesArraysHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
+      'Misclassified utterances and their labels',
+      predictingMisclassifiedUtterancesArrays,
+      ['Utterance', 'Labels', 'Predictions']);
+    return {predictingMisclassifiedUtterancesArrays, predictingMisclassifiedUtterancesArraysHtml, predictingMisclassifiedUtterancesSimpleArrays};
+  }
+
+  public static generateAssessmentLabelObjectConfusionMatrixMetricsAndHtmlTable(
+    predictionLabelStructureArray: PredictionLabelStructure[],
+    labelArrayAndMap: {
+      'stringArray': string[];
+      'stringMap': {[id: string]: number};}): {
+      'confusionMatrix': IConfusionMatrix;
+      'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
+      'predictingConfusionMatrixOutputLines': string[][];
+      'confusionMatrixMetricsHtml': string;
+      'confusionMatrixAverageMetricsHtml': string;
+    } {
+    const confusionMatrix: MultiLabelObjectConfusionMatrix = new MultiLabelObjectConfusionMatrix(
+      labelArrayAndMap.stringArray,
+      labelArrayAndMap.stringMap);
+    const multiLabelConfusionMatrixSubset: MultiLabelConfusionMatrixSubset = new MultiLabelConfusionMatrixSubset(
+      labelArrayAndMap.stringArray,
+      labelArrayAndMap.stringMap);
+    for (const predictionLabelStructure of predictionLabelStructureArray) {
+      if (predictionLabelStructure) {
+        confusionMatrix.addInstanceByLabelObjects(predictionLabelStructure.labels, predictionLabelStructure.labelsPredicted);
+      }
+    }
+    return Utility.generateAssessmentConfusionMatrixMetricsAndHtmlTableWithConfusionMatrices(
+      confusionMatrix,
+      multiLabelConfusionMatrixSubset, // ---- NOTE ---- not used for entity labels.
+      labelArrayAndMap);
+  }
+
+  public static assessLabelObjectPredictions(
+    groundTruthSetUtteranceLabelsMap: { [id: string]: Label[] },
+    predictionSetUtteranceLabelsMap: { [id: string]: Label[] },
+    labelArrayAndMap: {
+      'stringArray': string[];
+      'stringMap': {[id: string]: number};}): PredictionLabelStructure[] {
+    const predictionLabelStructureArray: PredictionLabelStructure[] = [];
+    for (const groundTruthSetUtteranceLabels of Object.entries(groundTruthSetUtteranceLabelsMap)) {
+      const utterance: string = groundTruthSetUtteranceLabels[0];
+      const groundTruthSetLabels: Label[] = groundTruthSetUtteranceLabels[1];
+      let predictionSetLabels: Label[] = [];
+      if (utterance in predictionSetUtteranceLabelsMap) {
+        predictionSetLabels = predictionSetUtteranceLabelsMap[utterance];
+      }
+      const groundTruthSetLabelsIndexes: number[] = groundTruthSetLabels.map((x: Label) => labelArrayAndMap.stringMap[x.name]);
+      const groundTruthSetLabelsConcatenated: string = groundTruthSetLabels.map((x: Label) => x.toSimpleString()).join(',');
+      if (Utility.toPrintDetailedDebuggingLogToConsole) {
+        Utility.debuggingLog(`Utility.score(), before calling score(), utterance=${utterance}`);
+      }
+      const predictionSetLabelsIndexes: number[] = predictionSetLabels.map((x: Label) => labelArrayAndMap.stringMap[x.name]);
+      const predictionSetLabelsConcatenated: string = predictionSetLabels.map((x: Label) => x.toSimpleString()).join(',');
+      if (Utility.toPrintDetailedDebuggingLogToConsole) {
+        Utility.debuggingLog(`Utility.score(), before calling score(), utterance=${utterance}`);
+      }
+      const labelsPredictionEvaluation: number[] = Utility.evaluateLabelObjectPrediction(groundTruthSetLabels, predictionSetLabels);
+      predictionLabelStructureArray.push(new PredictionLabelStructure(
+        utterance,
+        labelsPredictionEvaluation,
+        groundTruthSetLabels,
+        groundTruthSetLabelsConcatenated,
+        groundTruthSetLabelsIndexes,
+        predictionSetLabels,
+        predictionSetLabelsConcatenated,
+        predictionSetLabelsIndexes));
+    }
+    return predictionLabelStructureArray;
+  }
+
+  public static evaluateLabelObjectPrediction(groundTruths: Label[], predictions: Label[]): number[] {
+    const microConfusionMatrix: number[] = [0, 0, 0];
+    for (const prediction of predictions) {
+      let predictionIsInGroundTruth: boolean = false;
+      for (const groundTruth of groundTruths) {
+        if (prediction.equals(groundTruth)) {
+          predictionIsInGroundTruth = true;
+          break;
+        }
+      }
+      if (predictionIsInGroundTruth) {
+        microConfusionMatrix[0]++; // ---- NOTE ---- 0 for true positive as the prediction is in the ground-trueh set.
+      } else {
+        microConfusionMatrix[2]++; // ---- NOTE ---- 2 for false positive as the prediction is not in the ground-truth set.
+      }
+    }
+    for (const groundTruth of groundTruths) {
+      let groundTruthInPrediction: boolean = false;
+      for (const prediction of predictions) {
+        if (groundTruth.equals(prediction)) {
+          groundTruthInPrediction = true;
+          break;
+        }
+      }
+      if (!groundTruthInPrediction) {
+        microConfusionMatrix[1]++; // ---- NOTE ---- 1 for false negative as the ground-truth is not in the prediction set.
+      }
+    }
+    return microConfusionMatrix;
+  }
+
+  // eslint-disable-next-line max-params
   public static generateAssessmentEvaluationReportFiles(
     stringArray: string[],
     evaluationSummary: string,
@@ -239,7 +698,7 @@ export class Utility {
           'predictingMisclassifiedUtterancesArraysHtml': string;
           'predictingMisclassifiedUtterancesSimpleArrays': string[][];};
         'confusionMatrixAnalysis': {
-          'confusionMatrix': MultiLabelConfusionMatrix;
+          'confusionMatrix': IConfusionMatrix;
           'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
           'predictingConfusionMatrixOutputLines': string[][];
           'confusionMatrixMetricsHtml': string;
@@ -247,7 +706,7 @@ export class Utility {
       'predictionStructureArray': PredictionStructure[];
     } {
     // ---- NOTE ---- load the assessment evaluation summary template.
-    const evaluationSummary: string = AssessmentIntentSummaryTemplateHtml.html;
+    const evaluationSummary: string = AssessmentLabelSummaryTemplateHtml.html;
     // ---- NOTE ---- generate evaluation report for the ground-truth set.
     Utility.debuggingLog('Utility.generateAssessmentEvaluationReport(), ready to call Utility.generateEvaluationReportLabelUtteranceStatistics()');
     const evaluationReportGroundTruthSetLabelUtteranceStatistics: {
@@ -273,8 +732,8 @@ export class Utility {
       groundTruthSetLabels,
       groundTruthSetUtteranceLabelsMap,
       groundTruthSetUtteranceLabelDuplicateMap,
-      '{GROUND_TRUTH_SET_INTENT_UTTERANCE_STATISTICS}',
-      '{GROUND_TRUTH_SET_UTTERANCE_DUPLICATES}',
+      '{GROUND_TRUTH_SET_LABEL_TEXT_STATISTICS}',
+      '{GROUND_TRUTH_SET_TEXT_DUPLICATES}',
       false); // ---- NOTE ---- false, as the 'assess' does not use an unknown threshold to generate UNKNOWN prediction,
     // ---- NOTE ----           so unknown labels are purely and already processed by the data processing logic before.
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
@@ -306,8 +765,8 @@ export class Utility {
       groundTruthSetLabels,
       predictionSetUtteranceLabelsMap,
       predictionSetUtteranceLabelDuplicateMap,
-      '{PREDICTION_SET_INTENT_UTTERANCE_STATISTICS}',
-      '{PREDICTION_SET_UTTERANCE_DUPLICATES}',
+      '{PREDICTION_SET_LABEL_TEXT_STATISTICS}',
+      '{PREDICTION_SET_TEXT_DUPLICATES}',
       false); // ---- NOTE ---- false, as the 'assess' does not use an unknown threshold to generate UNKNOWN prediction,
     // ---- NOTE ----           so unknown labels are purely and already processed by the data processing logic before.
     if (Utility.toPrintDetailedDebuggingLogToConsole) {
@@ -315,7 +774,7 @@ export class Utility {
     }
     Utility.debuggingLog('Utility.generateAssessmentEvaluationReport(), finished calling Utility.generateEvaluationReportLabelUtteranceStatistics()');
     // ---- NOTE ---- produce prediction evaluation
-    const predictionStructureArray: PredictionStructure[] = Utility.assessIntentPredictions(
+    const predictionStructureArray: PredictionStructure[] = Utility.assessMultiLabelIntentPredictions(
       groundTruthSetUtteranceLabelsMap,
       predictionSetUtteranceLabelsMap,
       evaluationReportGroundTruthSetLabelUtteranceStatistics.labelArrayAndMap);
@@ -328,7 +787,7 @@ export class Utility {
         'predictingMisclassifiedUtterancesArraysHtml': string;
         'predictingMisclassifiedUtterancesSimpleArrays': string[][];};
       'confusionMatrixAnalysis': {
-        'confusionMatrix': MultiLabelConfusionMatrix;
+        'confusionMatrix': IConfusionMatrix;
         'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
         'predictingConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
@@ -369,7 +828,7 @@ export class Utility {
         'predictingMisclassifiedUtterancesArraysHtml': string;
         'predictingMisclassifiedUtterancesSimpleArrays': string[][];};
       'confusionMatrixAnalysis': {
-        'confusionMatrix': MultiLabelConfusionMatrix;
+        'confusionMatrix': IConfusionMatrix;
         'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
         'predictingConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
@@ -383,11 +842,11 @@ export class Utility {
     } = Utility.generateAssessmentMisclassifiedStatisticsAndHtmlTable(
       predictionStructureArray);
     evaluationSummary = evaluationSummary.replace(
-      '{MISCLASSIFICATION}', misclassifiedAnalysis.predictingMisclassifiedUtterancesArraysHtml);
-    Utility.debuggingLog('Utility.generateAssessmentEvaluationReportAnalyses(), finished generating {MISCLASSIFICATION} content');
+      '{MIS_CLASSIFICATION}', misclassifiedAnalysis.predictingMisclassifiedUtterancesArraysHtml);
+    Utility.debuggingLog('Utility.generateAssessmentEvaluationReportAnalyses(), finished generating {MIS_CLASSIFICATION} content');
     // ---- NOTE ---- produce confusion matrix result.
     const confusionMatrixAnalysis: {
-      'confusionMatrix': MultiLabelConfusionMatrix;
+      'confusionMatrix': IConfusionMatrix;
       'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
       'predictingConfusionMatrixOutputLines': string[][];
       'confusionMatrixMetricsHtml': string;
@@ -404,19 +863,6 @@ export class Utility {
       evaluationSummary,
       misclassifiedAnalysis,
       confusionMatrixAnalysis};
-    // ---- NOTE-PLACE-HOLDER ---- return {
-    // ---- NOTE-PLACE-HOLDER ----   evaluationSummary: evaluationSummary,
-    // ---- NOTE-PLACE-HOLDER ----   misclassifiedAnalysis: {
-    // ---- NOTE-PLACE-HOLDER ----     predictingMisclassifiedUtterancesArrays: [],
-    // ---- NOTE-PLACE-HOLDER ----     predictingMisclassifiedUtterancesArraysHtml: '',
-    // ---- NOTE-PLACE-HOLDER ----     predictingMisclassifiedUtterancesSimpleArrays: []},
-    // ---- NOTE-PLACE-HOLDER ----   confusionMatrixAnalysis: {
-    // ---- NOTE-PLACE-HOLDER ----     confusionMatrix: new MultiLabelConfusionMatrix(labelArrayAndMap.stringArray, labelArrayAndMap.stringMap),
-    // ---- NOTE-PLACE-HOLDER ----     multiLabelConfusionMatrixSubset: new MultiLabelConfusionMatrixSubset(labelArrayAndMap.stringArray, labelArrayAndMap.stringMap),
-    // ---- NOTE-PLACE-HOLDER ----     predictingConfusionMatrixOutputLines: [],
-    // ---- NOTE-PLACE-HOLDER ----     confusionMatrixMetricsHtml: '',
-    // ---- NOTE-PLACE-HOLDER ----     confusionMatrixAverageMetricsHtml: ''},
-    // ---- NOTE-PLACE-HOLDER ---- };
   }
 
   public static generateAssessmentMisclassifiedStatisticsAndHtmlTable(
@@ -448,9 +894,9 @@ export class Utility {
       }
     }
     const predictingMisclassifiedUtterancesArraysHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
-      'Misclassified utterances and their intents',
+      'Misclassified utterances and their labels',
       predictingMisclassifiedUtterancesArrays,
-      ['Utterance', 'Intents', 'Predictions']);
+      ['Utterance', 'Labels', 'Predictions']);
     return {predictingMisclassifiedUtterancesArrays, predictingMisclassifiedUtterancesArraysHtml, predictingMisclassifiedUtterancesSimpleArrays};
   }
 
@@ -459,14 +905,12 @@ export class Utility {
     labelArrayAndMap: {
       'stringArray': string[];
       'stringMap': {[id: string]: number};}): {
-      'confusionMatrix': MultiLabelConfusionMatrix;
+      'confusionMatrix': IConfusionMatrix;
       'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
       'predictingConfusionMatrixOutputLines': string[][];
       'confusionMatrixMetricsHtml': string;
       'confusionMatrixAverageMetricsHtml': string;
     } {
-    // -----------------------------------------------------------------------
-    const predictingConfusionMatrixOutputLines: string[][] = [];
     const confusionMatrix: MultiLabelConfusionMatrix = new MultiLabelConfusionMatrix(
       labelArrayAndMap.stringArray,
       labelArrayAndMap.stringMap);
@@ -479,6 +923,26 @@ export class Utility {
         multiLabelConfusionMatrixSubset.addInstanceByLabelIndexes(predictionStructure.labelsIndexes, predictionStructure.labelsPredictedIndexes);
       }
     }
+    return Utility.generateAssessmentConfusionMatrixMetricsAndHtmlTableWithConfusionMatrices(
+      confusionMatrix,
+      multiLabelConfusionMatrixSubset,
+      labelArrayAndMap);
+  }
+
+  public static generateAssessmentConfusionMatrixMetricsAndHtmlTableWithConfusionMatrices(
+    confusionMatrix: IConfusionMatrix,
+    multiLabelConfusionMatrixSubset: MultiLabelConfusionMatrixSubset,
+    labelArrayAndMap: {
+      'stringArray': string[];
+      'stringMap': {[id: string]: number};}): {
+      'confusionMatrix': IConfusionMatrix;
+      'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
+      'predictingConfusionMatrixOutputLines': string[][];
+      'confusionMatrixMetricsHtml': string;
+      'confusionMatrixAverageMetricsHtml': string;
+    } {
+    // -----------------------------------------------------------------------
+    const predictingConfusionMatrixOutputLines: string[][] = [];
     const binaryConfusionMatrices: BinaryConfusionMatrix[] = confusionMatrix.getBinaryConfusionMatrices();
     Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), binaryConfusionMatrices.length=${binaryConfusionMatrices.length}`);
     for (let i: number = 0; i < binaryConfusionMatrices.length; i++) {
@@ -516,7 +980,7 @@ export class Utility {
     const confusionMatrixMetricsHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
       'Confusion matrix metrics',
       predictingConfusionMatrixOutputLines,
-      ['Intent', 'Precision', 'Recall', 'F1', 'Accuracy', '#TruePositives', '#FalsePositives', '#TrueNegatives', '#FalseNegatives', 'Support', 'Total']);
+      ['Label', 'Precision', 'Recall', 'F1', 'Accuracy', '#TruePositives', '#FalsePositives', '#TrueNegatives', '#FalseNegatives', 'Support', 'Total']);
     // -----------------------------------------------------------------------
     const predictingConfusionMatrixAverageOutputLines: string[][] = [];
     const microAverageMetrics: {
@@ -525,7 +989,7 @@ export class Utility {
       'falsePositives': number;
       'falseNegatives': number;
       'total': number;
-    } = confusionMatrix.getMicroAverageMetrics();
+    } = confusionMatrix.getMicroAverageMetrics([]);
     const predictingConfusionMatrixOutputLineMicroAverage: any[] = [
       'Micro-Average',
       'N/A', // ---- Utility.round(microAverageMetrics.averagePrecisionRecallF1Accuracy), // ---- NOTE ---- in multi-label, there is no negative, so calculation of precision is equal to that of recall.
@@ -551,7 +1015,7 @@ export class Utility {
       'averageFalseNegatives': number;
       'averageSupport': number;
       'total': number;
-    } = confusionMatrix.getMacroAverageMetrics();
+    } = confusionMatrix.getMacroAverageMetrics([]);
     const predictingConfusionMatrixOutputLineMacroAverage: any[] = [
       'Macro-Average',
       Utility.round(macroAverageMetrics.averagePrecision),
@@ -577,7 +1041,7 @@ export class Utility {
       'averageFalseNegatives': number;
       'averageSupport': number;
       'total': number;
-    } = confusionMatrix.getSummationMacroAverageMetrics();
+    } = confusionMatrix.getSummationMacroAverageMetrics([]);
     const predictingConfusionMatrixOutputLineSummationMacroAverage: any[] = [
       'Summation Macro-Average',
       Utility.round(summationMacroAverageMetrics.averagePrecision),
@@ -603,7 +1067,7 @@ export class Utility {
       'averageFalseNegatives': number;
       'averageSupport': number;
       'total': number;
-    } = confusionMatrix.getPositiveSupportLabelMacroAverageMetrics();
+    } = confusionMatrix.getPositiveSupportLabelMacroAverageMetrics([]);
     const predictingConfusionMatrixOutputLinePositiveSupportLabelMacroAverage: any[] = [
       'Positive Support Macro-Average',
       Utility.round(positiveSupportLabelMacroAverageMetrics.averagePrecision),
@@ -629,7 +1093,7 @@ export class Utility {
       'averageFalseNegatives': number;
       'averageSupport': number;
       'total': number;
-    } = confusionMatrix.getPositiveSupportLabelSummationMacroAverageMetrics();
+    } = confusionMatrix.getPositiveSupportLabelSummationMacroAverageMetrics([]);
     const predictingConfusionMatrixOutputLinePositiveSupportLabelSummationMacroAverage: any[] = [
       'Positive Support Summation Macro-Average',
       Utility.round(positiveSupportLabelSummationMacroAverageMetrics.averagePrecision),
@@ -651,7 +1115,7 @@ export class Utility {
       'averageAccuracy': number;
       'averageSupport': number;
       'total': number;
-    } = confusionMatrix.getWeightedMacroAverageMetrics();
+    } = confusionMatrix.getWeightedMacroAverageMetrics([]);
     const predictingConfusionMatrixOutputLineWeightedMacroAverage: any[] = [
       'Weighted Macro-Average',
       Utility.round(weightedMacroAverageMetrics.averagePrecision),
@@ -677,7 +1141,7 @@ export class Utility {
       'averageFalseNegatives': number;
       'averageSupport': number;
       'total': number;
-    } = confusionMatrix.getSummationWeightedMacroAverageMetrics();
+    } = confusionMatrix.getSummationWeightedMacroAverageMetrics([]);
     const predictingConfusionMatrixOutputLineSummationWeightedMacroAverage: any[] = [
       'Weighted Summation Macro-Average',
       Utility.round(summationWeightedMacroAverageMetrics.averagePrecision),
@@ -703,7 +1167,7 @@ export class Utility {
       'averageFalseNegatives': number;
       'averageSupport': number;
       'total': number;
-    } = multiLabelConfusionMatrixSubset.getMacroAverageMetrics();
+    } = multiLabelConfusionMatrixSubset.getMacroAverageMetrics([]);
     const predictingConfusionMatrixOutputLineSubsetMacroAggregate: any[] = [
       'Multi-Label Subset Aggregate',
       Utility.round(subsetMacroAggregateMetrics.averagePrecision),
@@ -718,12 +1182,12 @@ export class Utility {
       subsetMacroAggregateMetrics.total,
     ];
     predictingConfusionMatrixAverageOutputLines.push(predictingConfusionMatrixOutputLineSubsetMacroAggregate);
-    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getMicroAverageMetrics())=${JSON.stringify(confusionMatrix.getMicroAverageMetrics())}`);
-    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getMacroAverageMetrics())=${JSON.stringify(confusionMatrix.getMacroAverageMetrics())}`);
-    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getWeightedMacroAverageMetrics())=${JSON.stringify(confusionMatrix.getWeightedMacroAverageMetrics())}`);
-    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(multiLabelConfusionMatrixSubset.getMicroAverageMetrics())=${JSON.stringify(multiLabelConfusionMatrixSubset.getMicroAverageMetrics())}`);
-    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(multiLabelConfusionMatrixSubset.getMacroAverageMetrics())=${JSON.stringify(multiLabelConfusionMatrixSubset.getMacroAverageMetrics())}`);
-    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(multiLabelConfusionMatrixSubset.getWeightedMacroAverageMetrics())=${JSON.stringify(multiLabelConfusionMatrixSubset.getWeightedMacroAverageMetrics())}`);
+    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getMicroAverageMetrics())=${JSON.stringify(confusionMatrix.getMicroAverageMetrics([]))}`);
+    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getMacroAverageMetrics())=${JSON.stringify(confusionMatrix.getMacroAverageMetrics([]))}`);
+    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(confusionMatrix.getWeightedMacroAverageMetrics())=${JSON.stringify(confusionMatrix.getWeightedMacroAverageMetrics([]))}`);
+    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(multiLabelConfusionMatrixSubset.getMicroAverageMetrics())=${JSON.stringify(multiLabelConfusionMatrixSubset.getMicroAverageMetrics([]))}`);
+    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(multiLabelConfusionMatrixSubset.getMacroAverageMetrics())=${JSON.stringify(multiLabelConfusionMatrixSubset.getMacroAverageMetrics([]))}`);
+    Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), JSON.stringify(multiLabelConfusionMatrixSubset.getWeightedMacroAverageMetrics())=${JSON.stringify(multiLabelConfusionMatrixSubset.getWeightedMacroAverageMetrics([]))}`);
     Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), multiLabelConfusionMatrixSubset.getBinaryConfusionMatrix().getTotal()         =${multiLabelConfusionMatrixSubset.getBinaryConfusionMatrix().getTotal()}`);
     Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), multiLabelConfusionMatrixSubset.getBinaryConfusionMatrix().getTruePositives() =${multiLabelConfusionMatrixSubset.getBinaryConfusionMatrix().getTruePositives()}`);
     Utility.debuggingLog(`Utility.generateConfusionMatrixMetricsAndHtmlTable(), multiLabelConfusionMatrixSubset.getBinaryConfusionMatrix().getFalsePositives()=${multiLabelConfusionMatrixSubset.getBinaryConfusionMatrix().getFalsePositives()}`);
@@ -738,7 +1202,7 @@ export class Utility {
     return {confusionMatrix, multiLabelConfusionMatrixSubset, predictingConfusionMatrixOutputLines, confusionMatrixMetricsHtml, confusionMatrixAverageMetricsHtml};
   }
 
-  public static assessIntentPredictions(
+  public static assessMultiLabelIntentPredictions(
     groundTruthSetUtteranceLabelsMap: { [id: string]: string[] },
     predictionSetUtteranceLabelsMap: { [id: string]: string[] },
     labelArrayAndMap: {
@@ -762,7 +1226,7 @@ export class Utility {
       if (Utility.toPrintDetailedDebuggingLogToConsole) {
         Utility.debuggingLog(`Utility.score(), before calling score(), utterance=${utterance}`);
       }
-      const labelsPredictionEvaluation: number = Utility.evaluateMultiLabelPrediction(groundTruthSetLabels, predictionSetLabels);
+      const labelsPredictionEvaluation: number = Utility.evaluateMultiLabelSubsetPrediction(groundTruthSetLabels, predictionSetLabels);
       predictionStructureArray.push(new PredictionStructure(
         utterance,
         labelsPredictionEvaluation,
@@ -810,7 +1274,7 @@ export class Utility {
         'scoringLowConfidenceUtterancesArraysHtml': string;
         'scoringLowConfidenceUtterancesSimpleArrays': string[][];};
       'confusionMatrixAnalysis': {
-        'confusionMatrix': MultiLabelConfusionMatrix;
+        'confusionMatrix': IConfusionMatrix;
         'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
         'predictingConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
@@ -852,7 +1316,7 @@ export class Utility {
           'scoringLowConfidenceUtterancesArraysHtml': string;
           'scoringLowConfidenceUtterancesSimpleArrays': string[][];};
         'confusionMatrixAnalysis': {
-          'confusionMatrix': MultiLabelConfusionMatrix;
+          'confusionMatrix': IConfusionMatrix;
           'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
           'predictingConfusionMatrixOutputLines': string[][];
           'confusionMatrixMetricsHtml': string;
@@ -974,7 +1438,7 @@ export class Utility {
           'scoringLowConfidenceUtterancesArraysHtml': string;
           'scoringLowConfidenceUtterancesSimpleArrays': string[][];};
         'confusionMatrixAnalysis': {
-          'confusionMatrix': MultiLabelConfusionMatrix;
+          'confusionMatrix': IConfusionMatrix;
           'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
           'predictingConfusionMatrixOutputLines': string[][];
           'confusionMatrixMetricsHtml': string;
@@ -1009,8 +1473,8 @@ export class Utility {
       trainingSetLabels,
       utteranceLabelsMap,
       utteranceLabelDuplicateMap,
-      '{INTENT_UTTERANCE_STATISTICS}',
-      '{UTTERANCE_DUPLICATES}',
+      '{LABEL_TEXT_STATISTICS}',
+      '{TEXT_DUPLICATES}',
       unknownLabelPredictionThreshold > 0);
     Utility.debuggingLog('Utility.generateEvaluationReport(), finished calling Utility.generateEvaluationReportLabelUtteranceStatistics()');
     // ---- NOTE ---- collect utterance prediction and scores.
@@ -1039,7 +1503,7 @@ export class Utility {
         'scoringLowConfidenceUtterancesArraysHtml': string;
         'scoringLowConfidenceUtterancesSimpleArrays': string[][];};
       'confusionMatrixAnalysis': {
-        'confusionMatrix': MultiLabelConfusionMatrix;
+        'confusionMatrix': IConfusionMatrix;
         'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
         'predictingConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
@@ -1105,9 +1569,9 @@ export class Utility {
       Utility.buildStringIdNumberValueDictionaryFromStringArray(trainingSetLabels);
     Utility.debuggingLog(`Utility.generateEvaluationReportLabelUtteranceStatistics(), JSON.stringify(labelArrayAndMap.stringArray)=${JSON.stringify(labelArrayAndMap.stringArray)}`);
     Utility.debuggingLog(`Utility.generateEvaluationReportLabelUtteranceStatistics(), JSON.stringify(labelArrayAndMap.stringMap)=${JSON.stringify(labelArrayAndMap.stringMap)}`);
-    if (Utility.isEmptyStringArray(labelArrayAndMap.stringArray)) {
-      Utility.debuggingThrow('there is no label, something wrong?');
-    }
+    // ---- TODO ---- if (Utility.isEmptyStringArray(labelArrayAndMap.stringArray)) {
+    // ---- TODO ----   Utility.debuggingThrow('there is no label, something wrong?');
+    // ---- TODO ---- }
     // ---- NOTE ---- as the unknown threshold is greater than 0, the score function can make an UNKNOWN prediction.
     if (ensureUnknownLabelInLabelArrayAndMap) {
       if (!(Utility.UnknownLabel in labelArrayAndMap.stringMap)) {
@@ -1122,10 +1586,9 @@ export class Utility {
       'labelUtterancesMap': { [id: string]: string[] };
       'labelUtterancesTotal': number;
       'labelStatistics': string[][];
-      'labelStatisticsHtml': string;
-    } = Utility.generateLabelStatisticsAndHtmlTable(
-      utteranceLabelsMap,
-      labelArrayAndMap);
+      'labelStatisticsHtml': string; } = Utility.generateLabelStatisticsAndHtmlTable(
+        utteranceLabelsMap,
+        labelArrayAndMap);
     Utility.debuggingLog('Utility.generateEvaluationReportLabelUtteranceStatistics(), finish calling Utility.generateLabelStatisticsAndHtmlTable()');
     // ---- NOTE ---- generate utterance statistics
     const utteranceStatisticsAndHtmlTable: {
@@ -1135,25 +1598,25 @@ export class Utility {
       'utteranceStatisticsHtml': string; } = Utility.generateUtteranceStatisticsAndHtmlTable(
         utteranceLabelsMap);
     Utility.debuggingLog('Utility.generateEvaluationReportLabelUtteranceStatistics(), finish calling Utility.generateUtteranceStatisticsAndHtmlTable()');
-    // ---- NOTE ---- create the evaluation INTENT_UTTERANCE_STATISTICS summary from template.
-    const intentsUtterancesStatisticsHtml: string =
+    // ---- NOTE ---- create the evaluation LABEL_TEXT_STATISTICS summary from template.
+    const labelsUtterancesStatisticsHtml: string =
       labelStatisticsAndHtmlTable.labelStatisticsHtml + utteranceStatisticsAndHtmlTable.utteranceStatisticsHtml;
     evaluationSummary = evaluationSummary.replace(
-      evaluationSummaryTagIntentUtteranceStatistics, intentsUtterancesStatisticsHtml);
+      evaluationSummaryTagIntentUtteranceStatistics, labelsUtterancesStatisticsHtml);
     Utility.debuggingLog(`Utility.generateEvaluationReportLabelUtteranceStatistics(), finished generating ${evaluationSummaryTagIntentUtteranceStatistics} content`);
     // ---- NOTE ---- generate duplicate report.
     const utterancesMultiLabelArrays: [string, string][] = Object.entries(utteranceLabelsMap).filter(
       (x: [string, string[]]) => x[1].length > 1).map((x: [string, string[]]) => [x[0], x[1].join(',')]);
     const utterancesMultiLabelArraysHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
-      'Multi-label utterances and their intents',
+      'Multi-label utterances and their labels',
       utterancesMultiLabelArrays,
-      ['Utterance', 'Intents']);
+      ['Utterance', 'Labels']);
     // ---- NOTE ---- generate duplicate report.
     const utteranceLabelDuplicateHtml: string = Utility.convertMapSetToIndexedHtmlTable(
-      'Duplicate utterance and intent pairs',
+      'Duplicate utterance and label pairs',
       utteranceLabelDuplicateMap,
-      ['Utterance', 'Intent']);
-    // ---- NOTE ---- create the evaluation UTTERANCE_DUPLICATES summary from template.
+      ['Utterance', 'Label']);
+    // ---- NOTE ---- create the evaluation TEXT_DUPLICATES summary from template.
     const duplicateStatisticsHtml: string =
       utterancesMultiLabelArraysHtml + utteranceLabelDuplicateHtml;
     evaluationSummary = evaluationSummary.replace(
@@ -1193,7 +1656,7 @@ export class Utility {
         'scoringLowConfidenceUtterancesArraysHtml': string;
         'scoringLowConfidenceUtterancesSimpleArrays': string[][];};
       'confusionMatrixAnalysis': {
-        'confusionMatrix': MultiLabelConfusionMatrix;
+        'confusionMatrix': IConfusionMatrix;
         'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
         'predictingConfusionMatrixOutputLines': string[][];
         'confusionMatrixMetricsHtml': string;
@@ -1218,8 +1681,8 @@ export class Utility {
     } = Utility.generateMisclassifiedStatisticsAndHtmlTable(
       predictionScoreStructureArray);
     evaluationSummary = evaluationSummary.replace(
-      '{MISCLASSIFICATION}', misclassifiedAnalysis.scoringMisclassifiedUtterancesArraysHtml);
-    Utility.debuggingLog('Utility.generateEvaluationReportAnalyses(), finished generating {MISCLASSIFICATION} content');
+      '{MIS_CLASSIFICATION}', misclassifiedAnalysis.scoringMisclassifiedUtterancesArraysHtml);
+    Utility.debuggingLog('Utility.generateEvaluationReportAnalyses(), finished generating {MIS_CLASSIFICATION} content');
     // ---- NOTE ---- generate low-confidence HTML.
     const lowConfidenceAnalysis: {
       'scoringLowConfidenceUtterancesArrays': string[][];
@@ -1229,11 +1692,11 @@ export class Utility {
       predictionScoreStructureArray,
       lowConfidenceScoreThreshold);
     evaluationSummary = evaluationSummary.replace(
-      '{LOWCONFIDENCE}', lowConfidenceAnalysis.scoringLowConfidenceUtterancesArraysHtml);
-    Utility.debuggingLog('Utility.generateEvaluationReportAnalyses(), finished generating {LOWCONFIDENCE} content');
+      '{LOW_CONFIDENCE}', lowConfidenceAnalysis.scoringLowConfidenceUtterancesArraysHtml);
+    Utility.debuggingLog('Utility.generateEvaluationReportAnalyses(), finished generating {LOW_CONFIDENCE} content');
     // ---- NOTE ---- produce confusion matrix result.
     const confusionMatrixAnalysis: {
-      'confusionMatrix': MultiLabelConfusionMatrix;
+      'confusionMatrix': IConfusionMatrix;
       'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
       'predictingConfusionMatrixOutputLines': string[][];
       'confusionMatrixMetricsHtml': string;
@@ -1280,7 +1743,7 @@ export class Utility {
     labelArrayAndMap: {
       'stringArray': string[];
       'stringMap': {[id: string]: number};}): {
-      'confusionMatrix': MultiLabelConfusionMatrix;
+      'confusionMatrix': IConfusionMatrix;
       'multiLabelConfusionMatrixSubset': MultiLabelConfusionMatrixSubset;
       'predictingConfusionMatrixOutputLines': string[][];
       'confusionMatrixMetricsHtml': string;
@@ -1291,7 +1754,7 @@ export class Utility {
       predictionScoreStructureArray,
       labelArrayAndMap);
     // -----------------------------------------------------------------------
-    /*
+    /* ---- NOTE-REFACTORED-CAN-BE-REMOVED-LATER ----
     const predictingConfusionMatrixOutputLines: string[][] = [];
     const confusionMatrix: MultiLabelConfusionMatrix = new MultiLabelConfusionMatrix(
       labelArrayAndMap.stringArray,
@@ -1342,7 +1805,7 @@ export class Utility {
     const confusionMatrixMetricsHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
       'Confusion matrix metrics',
       predictingConfusionMatrixOutputLines,
-      ['Intent', 'Precision', 'Recall', 'F1', 'Accuracy', '#TruePositives', '#FalsePositives', '#TrueNegatives', '#FalseNegatives', 'Support', 'Total']);
+      ['Label', 'Precision', 'Recall', 'F1', 'Accuracy', '#TruePositives', '#FalsePositives', '#TrueNegatives', '#FalseNegatives', 'Support', 'Total']);
     // -----------------------------------------------------------------------
     const predictingConfusionMatrixAverageOutputLines: string[][] = [];
     const microAverageMetrics: {
@@ -1594,9 +2057,9 @@ export class Utility {
       }
     }
     const scoringLowConfidenceUtterancesArraysHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
-      'Low confidence utterances and their intents',
+      'Low confidence utterances and their labels',
       scoringLowConfidenceUtterancesArrays,
-      ['Utterance', 'Intents', 'Predictions']);
+      ['Utterance', 'Labels', 'Predictions']);
     return {scoringLowConfidenceUtterancesArrays, scoringLowConfidenceUtterancesArraysHtml, scoringLowConfidenceUtterancesSimpleArrays};
   }
 
@@ -1629,9 +2092,9 @@ export class Utility {
       }
     }
     const scoringMisclassifiedUtterancesArraysHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
-      'Misclassified utterances and their intents',
+      'Misclassified utterances and their labels',
       scoringMisclassifiedUtterancesArrays,
-      ['Utterance', 'Intents', 'Predictions']);
+      ['Utterance', 'Labels', 'Predictions']);
     return {scoringMisclassifiedUtterancesArrays, scoringMisclassifiedUtterancesArraysHtml, scoringMisclassifiedUtterancesSimpleArrays};
   }
 
@@ -1679,9 +2142,9 @@ export class Utility {
       }
     }
     const scoringAmbiguousUtterancesArraysHtml: string = Utility.convertDataArraysToIndexedHtmlTable(
-      'Ambiguous utterances and their intents',
+      'Ambiguous utterances and their labels',
       scoringAmbiguousUtterancesArrays,
-      ['Utterance', 'Intents', 'Predictions', 'Close Predictions']);
+      ['Utterance', 'Labels', 'Predictions', 'Close Predictions']);
     return {scoringAmbiguousUtterancesArrays, scoringAmbiguousUtterancesArraysHtml, scoringAmbiguousUtteranceSimpleArrays};
   }
 
@@ -1733,7 +2196,7 @@ export class Utility {
           labelsPredicted = [Utility.UnknownLabel];
         }
         const labelsPredictedConcatenated: string = labelsPredicted.join(',');
-        const labelsPredictedEvaluation: number = Utility.evaluateMultiLabelPrediction(labels, labelsPredicted);
+        const labelsPredictedEvaluation: number = Utility.evaluateMultiLabelSubsetPrediction(labels, labelsPredicted);
         const labelsPredictedClosestText: string[] = labelsPredictedIndexes.map((x: number) => scoreResultArray[x].closesttext);
         const predictedScoreStructureHtmlTable: string = Utility.selectedScoreResultsToHtmlTable(
           scoreResultArray,
@@ -1859,9 +2322,9 @@ export class Utility {
       (x: [string, string[]], index: number) => [index.toString(), x[0], labelArrayAndMap.stringMap[x[0]].toString(), x[1].length.toString(), Utility.round(x[1].length / labelUtterancesTotal).toString()]);
     labelStatistics.push(['Total', 'N/A', 'N/A', labelUtterancesTotal.toString(), 'N/A']);
     const labelStatisticsHtml: string = Utility.convertDataArraysToHtmlTable(
-      'Intent statistics',
+      'Label statistics',
       labelStatistics,
-      ['No', 'Intent', 'Intent Index', 'Utterance Count', 'Utterance Prevalence']);
+      ['No', 'Label', 'Label Index', 'Utterance Count', 'Utterance Prevalence']);
     return {labelUtterancesMap, labelUtterancesTotal, labelStatistics, labelStatisticsHtml};
   }
 
@@ -1900,19 +2363,43 @@ export class Utility {
     return selectedScoreStructureHtmlTable;
   }
 
-  public static evaluateMultiLabelPrediction(groundTruths: any[], predictions: any[]): number {
+  public static evaluateMultiLabelSubsetPrediction(groundTruths: any[], predictions: any[]): number {
     if (predictions.length <= 0) {
       if (groundTruths.length <= 0) {
-        return 3; // ---- NOTE ---- 3 for true negative as there is no prediction on an empty ground-truth set.
+        return 3;
+        // ---- NOTE ---- 3 for true negative as there is no prediction on an empty ground-truth set.
       }
-      return 1; // ---- NOTE ---- 1 for false negative as there is no prediction on a non-empty ground-truth set.
+      return 1;
+      // ---- NOTE ---- 1 for false negative as there is no prediction on a non-empty ground-truth set.
     }
     for (const prediction of predictions) {
       if (!groundTruths.includes(prediction)) {
-        return 2; // ---- NOTE ---- 2 for false positive as there is a prediction not in the ground-truth set.
+        return 2;
+        // ---- NOTE ---- 2 for false positive as there is a prediction not in the ground-truth set.
       }
     }
-    return 0; // ---- NOTE ---- 0 for true positive as every prediction is in the ground-trueh set.
+    return 0;
+    // ---- NOTE ---- 0 for true positive as every prediction is in the ground-trueh set.
+  }
+
+  public static evaluateMultiLabelPrediction(groundTruths: any[], predictions: any[]): number[] {
+    const microConfusionMatrix: number[] = [0, 0, 0];
+    for (const prediction of predictions) {
+      if (groundTruths.includes(prediction)) {
+        microConfusionMatrix[0]++;
+        // ---- NOTE ---- 0 for true positive as the prediction is in the ground-truth set.
+      } else {
+        microConfusionMatrix[2]++;
+        // ---- NOTE ---- 2 for false positive as the prediction is not in the ground-truth set.
+      }
+    }
+    for (const groundTruth of groundTruths) {
+      if (!predictions.includes(groundTruth)) {
+        microConfusionMatrix[1]++;
+        // ---- NOTE ---- 1 for false negative as the ground-truth is not in the prediction set.
+      }
+    }
+    return microConfusionMatrix;
   }
 
   public static reverseUniqueKeyedArray(input: {[id: string]: string[]}): {[id: string]: string[]} {
@@ -2060,8 +2547,9 @@ export class Utility {
         'outputFilename is empty');
     }
     if (Utility.isEmptyStringArrays(outputEvaluationReportDataArrays)) {
-      Utility.debuggingThrow(
-        'outputEvaluationReportDataArrays is empty');
+      return '';
+      // ---- Utility.debuggingThrow(
+      // ----   'outputEvaluationReportDataArrays is empty');
     }
     const outputLines: string[] = [];
     if (!Utility.isEmptyStringArray(outputDataArraryHeaders)) {
@@ -2162,6 +2650,54 @@ export class Utility {
           outputLines.push(indentCumulative + indent + indent + '</td>');
         }
         outputLines.push(indentCumulative + indent + '</tr>');
+      }
+    }
+    outputLines.push(indentCumulative + '</table>');
+    const outputContent: string = outputLines.join('\n');
+    return outputContent;
+  }
+
+  // eslint-disable-next-line max-params
+  public static convertMapArrayToIndexedHtmlTable(
+    tableDescription: string,
+    outputEvaluationMapArray: Map<any, any[]>,
+    outputDataArraryHeaders: string[] = [],
+    indentCumulative: string = '  ',
+    indent: string = '  '): string {
+    const outputLines: string[] = [];
+    if (!Utility.isEmptyString(tableDescription)) {
+      outputLines.push(indentCumulative + `<p><strong>${tableDescription}</strong></p>`);
+    }
+    outputLines.push(indentCumulative + '<table class="table">');
+    if (!Utility.isEmptyStringArray(outputDataArraryHeaders)) {
+      outputLines.push(indentCumulative + indent + '<tr>');
+      outputLines.push(indentCumulative + indent + indent + '<th>');
+      outputLines.push(indentCumulative + indent + indent + 'No');
+      outputLines.push(indentCumulative + indent + indent + '</th>');
+      for (const headerEntry of outputDataArraryHeaders) {
+        outputLines.push(indentCumulative + indent + indent + '<th>');
+        outputLines.push(indentCumulative + indent + indent + headerEntry);
+        outputLines.push(indentCumulative + indent + indent + '</th>');
+      }
+      outputLines.push(indentCumulative + indent + '<tr>');
+    }
+    if (Utility.isEmptyAnyKeyGenericArrayMap(outputEvaluationMapArray)) {
+      let index: number = 0;
+      for (const outputEvaluationMapArrayEntry of outputEvaluationMapArray) {
+        const key: any = outputEvaluationMapArrayEntry[0];
+        for (const valueSetEntry of outputEvaluationMapArrayEntry[1]) {
+          outputLines.push(indentCumulative + indent + '<tr>');
+          outputLines.push(indentCumulative + indent + indent + '<td>');
+          outputLines.push(indentCumulative + indent + indent + index++);
+          outputLines.push(indentCumulative + indent + indent + '</td>');
+          outputLines.push(indentCumulative + indent + indent + '<td>');
+          outputLines.push(indentCumulative + indent + indent + key);
+          outputLines.push(indentCumulative + indent + indent + '</td>');
+          outputLines.push(indentCumulative + indent + indent + '<td>');
+          outputLines.push(indentCumulative + indent + indent + valueSetEntry);
+          outputLines.push(indentCumulative + indent + indent + '</td>');
+          outputLines.push(indentCumulative + indent + '</tr>');
+        }
       }
     }
     outputLines.push(indentCumulative + '</table>');
@@ -2285,6 +2821,12 @@ export class Utility {
       }
     }
     return {indexMax, max};
+  }
+
+  public static isEmptyAnyKeyGenericArrayMap(
+    anyKeyGenericSetMap: Map<any, any[]>): boolean {
+    return !(anyKeyGenericSetMap &&
+      [...anyKeyGenericSetMap].length > 0);
   }
 
   public static isEmptyAnyKeyGenericSetMap(

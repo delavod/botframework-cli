@@ -87,9 +87,9 @@ export class DictionaryMapUtility {
             });
         }
         return utteranceLabels;
-      }
+    }
 
-      public static processUnknowLabelsInUtteranceLabelsMap(
+    public static processUnknowLabelsInUtteranceLabelsMap(
         utteranceLabels: {
             "utteranceLabelsMap": { [id: string]: string[] };
             "utteranceLabelDuplicateMap": Map<string, Set<string>>; }): {
@@ -135,7 +135,7 @@ export class DictionaryMapUtility {
             });
         }
         return utteranceLabels;
-      }
+    }
 
     public static convertStringKeyGenericSetNativeMapToDictionary<T>(
         stringKeyGenericSetMap: Map<string, Set<T>>): { [id: string]: Set<T> } {
@@ -312,7 +312,7 @@ export class DictionaryMapUtility {
         if (!stringKeyStringSetMap) {
             stringKeyStringSetMap = new Map<string, Set<string>>();
         }
-        if (key in stringKeyStringSetMap) {
+        if (stringKeyStringSetMap.has(key)) {
             let stringSet: Set<string> | undefined = stringKeyStringSetMap.get(key);
             if (!stringSet) {
                 stringSet = new Set<string>();
@@ -333,7 +333,7 @@ export class DictionaryMapUtility {
         if (!numberKeyStringSetMap) {
             numberKeyStringSetMap = new Map<number, Set<string>>();
         }
-        if (key in numberKeyStringSetMap) {
+        if (numberKeyStringSetMap.has(key)) {
             let stringSet: Set<string> | undefined = numberKeyStringSetMap.get(key);
             if (!stringSet) {
                 stringSet = new Set<string>();
@@ -355,7 +355,7 @@ export class DictionaryMapUtility {
         if (DictionaryMapUtility.isEmptyStringKeyGenericSetMap<string>(stringKeyStringSetMap)) {
             stringKeyStringSetMap = DictionaryMapUtility.newTMapStringKeyGenericSet<string>();
         }
-        if (key in stringKeyStringSetMap) {
+        if (stringKeyStringSetMap.has(key)) {
             let stringSet: Set<string> | undefined = stringKeyStringSetMap.get(key);
             if (!stringSet) {
                 stringSet = new Set<string>();
@@ -376,7 +376,7 @@ export class DictionaryMapUtility {
         if (DictionaryMapUtility.isEmptyNumberKeyGenericSetMap<string>(numberKeyStringSetMap)) {
             numberKeyStringSetMap = DictionaryMapUtility.newTMapNumberKeyGenericSet<string>();
         }
-        if (key in numberKeyStringSetMap) {
+        if (numberKeyStringSetMap.has(key)) {
             let stringSet: Set<string> | undefined = numberKeyStringSetMap.get(key);
             if (!stringSet) {
                 stringSet = new Set<string>();
@@ -638,7 +638,7 @@ export class DictionaryMapUtility {
             }
             return 0;
           });
-      }
+    }
     public static sortNumberArray(inputStringArray: number[]): number[] {
         return inputStringArray.sort(
           (n1: number, n2: number) => {
@@ -650,7 +650,7 @@ export class DictionaryMapUtility {
             }
             return 0;
           });
-      }
+    }
     public static sortStringArray(inputStringArray: string[]): string[] {
         return inputStringArray.sort(
           (n1: string, n2: string) => {
@@ -662,7 +662,7 @@ export class DictionaryMapUtility {
             }
             return 0;
           });
-      }
+    }
 
     public static validateStringArrayAndStringKeyNumberValueMap(
         stringArray: string[],
@@ -743,7 +743,7 @@ export class DictionaryMapUtility {
         key: string,
         stringKeyNumberValueMap: TMapStringKeyGenericValue<number>,
         throwIfNotLegal: boolean = true): boolean {
-        if (key in stringKeyNumberValueMap) {
+        if (stringKeyNumberValueMap.has(key)) {
             return true;
         } else {
             if (throwIfNotLegal) {
@@ -1173,7 +1173,7 @@ export class DictionaryMapUtility {
         }
         for (const key in stringKeyNumberValueMapFirst) {
             if (key) {
-                if (key in stringKeyNumberValueMapSecond) {
+                if (stringKeyNumberValueMapSecond.has(key)) {
                     if (stringKeyNumberValueMapFirst.get(key) !== stringKeyNumberValueMapSecond.get(key)) {
                         if (throwIfNotLegal) {
                             Utility.debuggingThrow(
@@ -1195,7 +1195,7 @@ export class DictionaryMapUtility {
         }
         for (const key in stringKeyNumberValueMapSecond) {
             if (key) {
-                if (key in stringKeyNumberValueMapFirst) {
+                if (stringKeyNumberValueMapFirst.has(key)) {
                     if (stringKeyNumberValueMapFirst.get(key) !== stringKeyNumberValueMapSecond.get(key)) {
                         if (throwIfNotLegal) {
                             Utility.debuggingThrow(
