@@ -27,11 +27,7 @@ export class OrchestratorAssess {
   // eslint-disable-next-line complexity
   // eslint-disable-next-line max-params
   public static async runAsync(
-    inputPath: string, predictionPath: string, outputPath: string,
-    ambiguousClosenessParameter: number,
-    lowConfidenceScoreThresholdParameter: number,
-    multiLabelPredictionThresholdParameter: number,
-    unknownLabelPredictionThresholdParameter: number): Promise<void> {
+    inputPath: string, predictionPath: string, outputPath: string): Promise<void> {
     // -----------------------------------------------------------------------
     // ---- NOTE ---- process arguments --------------------------------------
     if (Utility.isEmptyString(inputPath)) {
@@ -43,17 +39,9 @@ export class OrchestratorAssess {
     if (Utility.isEmptyString(outputPath)) {
       Utility.debuggingThrow(`Please provide an output directory, CWD=${process.cwd()}, called from OrchestratorAssess.runAsync()`);
     }
-    const ambiguousCloseness: number = ambiguousClosenessParameter;
-    const lowConfidenceScoreThreshold: number = lowConfidenceScoreThresholdParameter;
-    const multiLabelPredictionThreshold: number = multiLabelPredictionThresholdParameter;
-    const unknownLabelPredictionThreshold: number = unknownLabelPredictionThresholdParameter;
     Utility.debuggingLog(`inputPath=${inputPath}`);
     Utility.debuggingLog(`predictionPath=${predictionPath}`);
     Utility.debuggingLog(`outputPath=${outputPath}`);
-    Utility.debuggingLog(`ambiguousCloseness=${ambiguousCloseness}`);
-    Utility.debuggingLog(`lowConfidenceScoreThreshold=${lowConfidenceScoreThreshold}`);
-    Utility.debuggingLog(`multiLabelPredictionThreshold=${multiLabelPredictionThreshold}`);
-    Utility.debuggingLog(`unknownLabelPredictionThreshold=${unknownLabelPredictionThreshold}`);
     // ---- NOTE ---- load the ground truth set ------------------------------
     const groundTruthFile: string = inputPath;
     if (!Utility.exists(groundTruthFile)) {

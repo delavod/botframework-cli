@@ -88,16 +88,8 @@ export class Orchestrator {
 
   // eslint-disable-next-line max-params
   public static async assessAsync(
-    inputPath: string, predictionPath: string, outputPath: string,
-    ambiguousClosenessParameter: number = Utility.DefaultAmbiguousClosenessParameter,
-    lowConfidenceScoreThresholdParameter: number = Utility.DefaultLowConfidenceScoreThresholdParameter,
-    multiLabelPredictionThresholdParameter: number = Utility.DefaultMultiLabelPredictionThresholdParameter,
-    unknownLabelPredictionThresholdParameter: number = Utility.DefaultUnknownLabelPredictionThresholdParameter): Promise<void> {
+    inputPath: string, predictionPath: string, outputPath: string): Promise<void> {
     await OrchestratorAssess.runAsync(
-      inputPath, predictionPath, outputPath,
-      ambiguousClosenessParameter,
-      lowConfidenceScoreThresholdParameter,
-      multiLabelPredictionThresholdParameter,
-      unknownLabelPredictionThresholdParameter);
+      inputPath, predictionPath, outputPath);
   }
 }
