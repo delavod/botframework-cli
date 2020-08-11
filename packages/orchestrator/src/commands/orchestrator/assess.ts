@@ -6,6 +6,7 @@
 // import * as path from 'path';
 import {Command, CLIError, flags} from '@microsoft/bf-cli-command';
 import {Orchestrator, Utility} from '@microsoft/bf-orchestrator';
+import {Utility as UtilityDispatcher} from '@microsoft/bf-dispatcher';
 
 export default class OrchestratorAssess extends Command {
   static description: string = 'Assess utterance/label samples from an input file and create an evaluation report';
@@ -19,10 +20,6 @@ export default class OrchestratorAssess extends Command {
     in: flags.string({char: 'i', description: 'Path to a previously created Orchestrator .blu file.'}),
     prediction: flags.string({char: 't', description: 'Path to a prediction file.'}),
     out: flags.string({char: 'o', description: 'Directory where analysis and output files will be placed.'}),
-    ambiguous: flags.string({char: 'a', description: `Ambiguous threshold, default to ${Utility.DefaultAmbiguousClosenessParameter}`}),
-    low_confidence: flags.string({char: 'l', description: `Low confidence threshold, default to ${Utility.DefaultLowConfidenceScoreThresholdParameter}`}),
-    multi_label: flags.string({char: 'p', description: `Plural/multi-label prediction threshold, default to ${Utility.DefaultMultiLabelPredictionThresholdParameter}`}),
-    unknown: flags.string({char: 'u', description: `Unknow label threshold, default to ${Utility.DefaultUnknownLabelPredictionThresholdParameter}`}),
     debug: flags.boolean({char: 'd'}),
     help: flags.help({char: 'h'}),
   }
@@ -34,52 +31,16 @@ export default class OrchestratorAssess extends Command {
     const predictionPath: string = flags.prediction;
     const outputPath: string = flags.out;
 
-    let ambiguousClosenessParameter: number = Utility.DefaultAmbiguousClosenessParameter;
-    let lowConfidenceScoreThresholdParameter: number = Utility.DefaultLowConfidenceScoreThresholdParameter;
-    let multiLabelPredictionThresholdParameter: number = Utility.DefaultMultiLabelPredictionThresholdParameter;
-    let unknownLabelPredictionThresholdParameter: number = Utility.DefaultUnknownLabelPredictionThresholdParameter;
-    if (flags.ambiguous) {
-      ambiguousClosenessParameter = Number(flags.ambiguous);
-      if (Number.isNaN(ambiguousClosenessParameter)) {
-        Utility.writeLineToConsole(`ambiguous parameter "${flags.ambiguous}" is not a number`);
-      }
-    }
-    if (flags.low_confidence) {
-      lowConfidenceScoreThresholdParameter = Number(flags.low_confidence);
-      if (Number.isNaN(lowConfidenceScoreThresholdParameter)) {
-        Utility.writeLineToConsole(`low-confidence parameter "${flags.ambiguous}" is not a number`);
-      }
-    }
-    if (flags.multi_label) {
-      multiLabelPredictionThresholdParameter = Number(flags.multi_label);
-      if (Number.isNaN(multiLabelPredictionThresholdParameter)) {
-        Utility.writeLineToConsole(`multi-label threshold parameter "${flags.multi_label}" is not a number`);
-      }
-    }
-    if (flags.unknown) {
-      unknownLabelPredictionThresholdParameter = Number(flags.unknown);
-      if (Number.isNaN(unknownLabelPredictionThresholdParameter)) {
-        Utility.writeLineToConsole(`unknown threshold parameter "${flags.unknown}" is not a number`);
-      }
-    }
-
     Utility.toPrintDebuggingLogToConsole = flags.debug;
+    UtilityDispatcher.toPrintDebuggingLogToConsole = flags.debug;
 
     Utility.debuggingLog(`OrchestratorAssess.run(): inputPath=${inputPath}`);
     Utility.debuggingLog(`OrchestratorAssess.run(): predictionPath=${predictionPath}`);
     Utility.debuggingLog(`OrchestratorAssess.run(): outputPath=${outputPath}`);
-    Utility.debuggingLog(`OrchestratorAssess.run(): ambiguousClosenessParameter=${ambiguousClosenessParameter}`);
-    Utility.debuggingLog(`OrchestratorAssess.run(): lowConfidenceScoreThresholdParameter=${lowConfidenceScoreThresholdParameter}`);
-    Utility.debuggingLog(`OrchestratorAssess.run(): multiLabelPredictionThresholdParameter=${multiLabelPredictionThresholdParameter}`);
-    Utility.debuggingLog(`OrchestratorAssess.run(): unknownLabelPredictionThresholdParameter=${unknownLabelPredictionThresholdParameter}`);
 
     try {
       await Orchestrator.assessAsync(
-        inputPath, predictionPath, outputPath,
-        ambiguousClosenessParameter,
-        lowConfidenceScoreThresholdParameter,
-        multiLabelPredictionThresholdParameter,
-        unknownLabelPredictionThresholdParameter);
+        inputPath, predictionPath, outputPath);
     } catch (error) {
       throw (new CLIError(error));
     }

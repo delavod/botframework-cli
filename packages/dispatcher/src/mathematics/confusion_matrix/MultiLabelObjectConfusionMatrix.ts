@@ -37,6 +37,12 @@ extends MultiLabelObjectConfusionMatrixWithBinaryArrayBase {
                     break;
                 }
             }
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ---- if (predictedLabel.name === "served_dish") {
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ----     Utility.debuggingLog(
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ----         "==== XXXXX=DEBUG=XXXXX ==== " +
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ----         `predictedLabel=${predictedLabel.toSimpleString()}, ` +
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ----         `predictedIsInGroundTruth=${predictedIsInGroundTruth}`);
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ---- }
             const predictedLabelId: number = this.labelMap[predictedLabel.name];
             if (predictedIsInGroundTruth) {
                 this.getBinaryConfusionMatrices()[predictedLabelId].addToTruePositives(value, false);
@@ -52,8 +58,14 @@ extends MultiLabelObjectConfusionMatrixWithBinaryArrayBase {
                     break;
                 }
             }
-            const groundTrueLabelId: number = this.labelMap[groundTrueLabel.name];
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ---- if (groundTrueLabel.name === "served_dish") {
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ----     Utility.debuggingLog(
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ----         "==== XXXXX=DEBUG=XXXXX ==== " +
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ----         `groundTrueLabel=${groundTrueLabel.toSimpleString()}, ` +
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ----         `groundTruthIsInPredicted=${groundTruthIsInPredicted}`);
+            // ---- NOTE-PLACE-HOLDER-FOR-TRACING ---- }
             if (!groundTruthIsInPredicted) {
+                const groundTrueLabelId: number = this.labelMap[groundTrueLabel.name];
                 this.getBinaryConfusionMatrices()[groundTrueLabelId].addToFalseNegatives(value, false);
             }
         }
