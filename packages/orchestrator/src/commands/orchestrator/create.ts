@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import {Command, CLIError, flags} from '@microsoft/bf-cli-command';
-import {Orchestrator, Utility} from '@microsoft/bf-orchestrator';
+import {Orchestrator, OrchestratorHelper, Utility} from '@microsoft/bf-orchestrator';
 import {OrchestratorSettings} from '../../utils/settings';
 
 export default class OrchestratorCreate extends Command {
@@ -32,16 +32,18 @@ export default class OrchestratorCreate extends Command {
     const {flags}: flags.Output = this.parse(OrchestratorCreate);
     const cwd: string = process.cwd();
     const input: string = path.resolve(flags.in || cwd);
-    const output: string = flags.out;
+    const output: string = path.resolve(flags.out || cwd);
     const baseModelPath: string = flags.model;
 
     Utility.toPrintDebuggingLogToConsole = flags.debug;
+    Utility.debuggingLog(`inputPathConfiguration=${input}`);
+    Utility.debuggingLog(`outputPath=${output}`);
 
     try {
       OrchestratorSettings.init(cwd, baseModelPath, output, cwd);
-      await Orchestrator.createAsync(
+      const retPayload: any = await Orchestrator.createAsync(
         OrchestratorSettings.ModelPath,
-        input, OrchestratorSettings.SnapshotPath,
+        OrchestratorHelper.getLuInputs(input),
         flags.hierarchical,
         flags.fullEmbeddings);
       OrchestratorSettings.persist();
@@ -49,6 +51,20 @@ export default class OrchestratorCreate extends Command {
       throw (new CLIError(error));
     }
 
+    /*
+    OrchestratorHelper.writeCreateOutputFile(output, retPayload);
+    const settingsFile: string = path.join(output, 'orchestrator.settings.json');
+    OrchestratorHelper.writeToFile(settingsFile, JSON.stringify(retPayload.settings, null, 2));
+    this.log(`orchestrator.settings.json is written to ${settingsFile}`);
+
+    const outPath: string = OrchestratorHelper.getOutputPath(outputPath, inputPathConfiguration);
+    const resolvedFilePath: string = OrchestratorHelper.writeToFile(outPath, snapshot);
+    if (Utility.isEmptyString(resolvedFilePath)) {
+      Utility.writeToConsole(`ERROR: failed writing the snapshot to file ${resolvedFilePath}`);
+    } else {
+      Utility.writeToConsole(`Snapshot written to ${resolvedFilePath}`);
+    }
+    */
     return 0;
   }
 }

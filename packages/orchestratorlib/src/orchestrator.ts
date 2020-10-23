@@ -14,13 +14,14 @@ import {Utility} from '.';
 
 export class Orchestrator {
   // eslint-disable-next-line max-params
-  public static async createAsync(baseModelPath: string, inputPathConfiguration: string, outputPath: string,
+  public static async createAsync(
+    baseModelPath: string, 
+    inputs: any[],
     hierarchical: boolean = false,
-    fullEmbedding: boolean = false): Promise<void> {
-    await OrchestratorCreate.runAsync(
+    fullEmbedding: boolean = false): Promise<any> {
+    return OrchestratorCreate.runAsync(
       baseModelPath,
-      inputPathConfiguration,
-      outputPath,
+      inputs,
       hierarchical,
       fullEmbedding);
   }
@@ -59,10 +60,10 @@ export class Orchestrator {
   */
   public static async baseModelGetAsync(
     baseModelPath: string,
-    nlrId: string,
+    versionId: string,
     onProgress: any = OrchestratorBaseModel.defaultHandler,
     onFinish: any = OrchestratorBaseModel.defaultHandler): Promise<void> {
-    await OrchestratorBaseModel.getAsync(baseModelPath, nlrId, onProgress, onFinish);
+    await OrchestratorBaseModel.getAsync(baseModelPath, versionId, onProgress, onFinish);
   }
 
   public static async baseModelListAsync(): Promise<string> {
